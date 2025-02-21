@@ -1,0 +1,6 @@
+@PoliceDispatchSystem_HostAddress = http://localhost:5239
+
+GET {{PoliceDispatchSystem_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
