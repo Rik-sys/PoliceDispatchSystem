@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DBEntities.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Models;

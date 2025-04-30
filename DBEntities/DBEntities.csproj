@@ -6,10 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DAL\DAL.csproj" />
-    <ProjectReference Include="..\IBL\IBL.csproj" />
-    <ProjectReference Include="..\IDAL\IDAL.csproj" />
-  </ItemGroup>
-
 </Project>

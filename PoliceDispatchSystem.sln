@@ -3,13 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35303.130
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoliceDispatchSystem", "PoliceDispatchSystem\PoliceDispatchSystem.csproj", "{5CBD6D8C-051D-4E85-9A62-77C2A93BF1F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoliceDispatchSystem", "PoliceDispatchSystem\PoliceDispatchSystem.csproj", "{5CBD6D8C-051D-4E85-9A62-77C2A93BF1F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{B8380154-4962-442F-9F7C-AC4ADA533115}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BLL", "BLL\BLL.csproj", "{B8380154-4962-442F-9F7C-AC4ADA533115}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{9DD7551C-4F68-4C4D-8C0E-264481083717}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{9DD7551C-4F68-4C4D-8C0E-264481083717}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTO", "DTO\DTO.csproj", "{7DF527F9-E981-4A9E-B02E-80EE5F7AAD9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTO", "DTO\DTO.csproj", "{7DF527F9-E981-4A9E-B02E-80EE5F7AAD9A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBEntities", "DBEntities\DBEntities.csproj", "{3205DDCD-DDA6-4043-A233-F36EEBB3C3CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IBL", "IBL\IBL.csproj", "{AA7E9129-1BF8-4CA6-80CD-FF3A159B9875}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IDAL", "IDAL\IDAL.csproj", "{5248CEAD-E2F7-4831-8A28-D1F73B475835}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +39,18 @@ Global
 		{7DF527F9-E981-4A9E-B02E-80EE5F7AAD9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DF527F9-E981-4A9E-B02E-80EE5F7AAD9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DF527F9-E981-4A9E-B02E-80EE5F7AAD9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3205DDCD-DDA6-4043-A233-F36EEBB3C3CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3205DDCD-DDA6-4043-A233-F36EEBB3C3CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3205DDCD-DDA6-4043-A233-F36EEBB3C3CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3205DDCD-DDA6-4043-A233-F36EEBB3C3CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA7E9129-1BF8-4CA6-80CD-FF3A159B9875}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA7E9129-1BF8-4CA6-80CD-FF3A159B9875}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA7E9129-1BF8-4CA6-80CD-FF3A159B9875}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA7E9129-1BF8-4CA6-80CD-FF3A159B9875}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5248CEAD-E2F7-4831-8A28-D1F73B475835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5248CEAD-E2F7-4831-8A28-D1F73B475835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5248CEAD-E2F7-4831-8A28-D1F73B475835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5248CEAD-E2F7-4831-8A28-D1F73B475835}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

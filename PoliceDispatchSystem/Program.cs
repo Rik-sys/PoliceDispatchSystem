@@ -1,4 +1,7 @@
 
+using BLL;
+using IBL;
+
 namespace PoliceDispatchSystem
 {
     public class Program
@@ -13,6 +16,8 @@ namespace PoliceDispatchSystem
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<IGraphService, GraphService>();
+
 
             var app = builder.Build();
 
