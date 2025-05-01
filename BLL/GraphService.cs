@@ -29,10 +29,10 @@ namespace BLL
             }
 
             // אם לא קשיר - נחבר רכיבים
-            if (!graph.IsConnected())
-            {
-                MakeGraphConnected(graph);
-            }
+            //if (!graph.IsConnected())
+            //{
+            //    MakeGraphConnected(graph);
+            //}
 
             return graph;
         }
