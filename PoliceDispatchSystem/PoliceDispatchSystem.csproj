@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Graphviz4Net" Version="3.0.2" />
+    <PackageReference Include="Itinero.IO.Osm" Version="1.5.1" />
     <PackageReference Include="microsoft.entityframeworkcore.design" Version="9.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="OsmSharp" Version="6.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.4" />
   </ItemGroup>
