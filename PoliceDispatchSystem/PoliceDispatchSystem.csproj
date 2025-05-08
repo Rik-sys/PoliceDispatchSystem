@@ -24,4 +24,10 @@
     <ProjectReference Include="..\IBL\IBL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Tools\osmconvert.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
