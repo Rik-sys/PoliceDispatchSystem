@@ -189,6 +189,20 @@ namespace BLL
 
             return distances;
         }
-        private double GetDistance(long node1, long node2) { return GetDistance(node1, node2); }
+        private double GetDistance(long node1, long node2)
+        {
+            if (_shortestPaths.TryGetValue((node1, node2), out double distance))
+            {
+                return distance;
+            }
+            else if (_shortestPaths.TryGetValue((node2, node1), out distance))
+            {
+                return distance;
+            }
+            else//למרות שבעיקרון הגרף אמור להיות קשיר,אבל ליתר ביטחון
+            {
+                return double.MaxValue;
+            }
+        }
     } 
 }
