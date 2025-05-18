@@ -72,45 +72,46 @@ namespace DAL
             return (allNodes, edges);
         }
 
-        public static void EnsureConnectivity(
-            ref Dictionary<long, (double lat, double lon)> localNodes,
-            ref List<(long from, long to)> localEdges,
-            Dictionary<long, (double lat, double lon)> fullNodes,
-            List<(long from, long to)> fullEdges,
-            double maxBridgeDistance)
-        {
-            var graph = BuildGraph(localEdges);
-            var components = FindConnectedComponents(graph);
-            if (components.Count <= 1) return; // כבר קשיר
+        //לא השתמשתי
+        //public static void EnsureConnectivity(
+        //    ref Dictionary<long, (double lat, double lon)> localNodes,
+        //    ref List<(long from, long to)> localEdges,
+        //    Dictionary<long, (double lat, double lon)> fullNodes,
+        //    List<(long from, long to)> fullEdges,
+        //    double maxBridgeDistance)
+        //{
+        //    var graph = BuildGraph(localEdges);
+        //    var components = FindConnectedComponents(graph);
+        //    if (components.Count <= 1) return; // כבר קשיר
 
-            foreach (var fromComp in components)
-            {
-                foreach (var toComp in components)
-                {
-                    if (fromComp == toComp) continue;
+        //    foreach (var fromComp in components)
+        //    {
+        //        foreach (var toComp in components)
+        //        {
+        //            if (fromComp == toComp) continue;
 
-                    foreach (var a in fromComp)
-                    {
-                        foreach (var b in toComp)
-                        {
-                            if (!fullNodes.ContainsKey(a) || !fullNodes.ContainsKey(b)) continue;
-                            var coordA = fullNodes[a];
-                            var coordB = fullNodes[b];
-                            double d = Haversine(coordA.lat, coordA.lon, coordB.lat, coordB.lon);
-                            if (d <= maxBridgeDistance)
-                            {
-                                localEdges.Add((a, b));
-                                if (!localNodes.ContainsKey(a))
-                                    localNodes[a] = fullNodes[a];
-                                if (!localNodes.ContainsKey(b))
-                                    localNodes[b] = fullNodes[b];
-                                return; // מחברים רכיב אחד בכל פעם
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //            foreach (var a in fromComp)
+        //            {
+        //                foreach (var b in toComp)
+        //                {
+        //                    if (!fullNodes.ContainsKey(a) || !fullNodes.ContainsKey(b)) continue;
+        //                    var coordA = fullNodes[a];
+        //                    var coordB = fullNodes[b];
+        //                    double d = Haversine(coordA.lat, coordA.lon, coordB.lat, coordB.lon);
+        //                    if (d <= maxBridgeDistance)
+        //                    {
+        //                        localEdges.Add((a, b));
+        //                        if (!localNodes.ContainsKey(a))
+        //                            localNodes[a] = fullNodes[a];
+        //                        if (!localNodes.ContainsKey(b))
+        //                            localNodes[b] = fullNodes[b];
+        //                        return; // מחברים רכיב אחד בכל פעם
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         private static Dictionary<long, List<long>> BuildGraph(List<(long from, long to)> edges)
         {

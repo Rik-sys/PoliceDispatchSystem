@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BLL
 {
-    class KCenterService : IKCenterService
+    public class KCenterService : IKCenterService
     {
         public List<long> SolveKCenter(Graph graph, int k)
         {
