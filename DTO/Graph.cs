@@ -52,7 +52,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+//ניסוי פיזור בתחום
 namespace DTO
 {
     public class Graph
@@ -144,5 +144,20 @@ namespace DTO
 
             return edges.ToList();
         }
+
+        public void AddNode(long nodeId, double lat, double lon)
+        {
+            if (!Nodes.ContainsKey(nodeId))
+            {
+                Nodes[nodeId] = new Node
+                {
+                    Id = nodeId,
+                    Latitude = lat,
+                    Longitude = lon,
+                    Edges = new List<Edge>()
+                };
+            }
+        }
+
     }
 }

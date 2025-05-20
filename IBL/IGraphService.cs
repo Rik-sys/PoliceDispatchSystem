@@ -30,6 +30,19 @@
 //    }
 //}
 
+
+//ניסיון פיזור בתחום
+//using DTO;
+//using System.Collections.Generic;
+
+//namespace IBL
+//{
+//    public interface IGraphService
+//    {
+//        Graph BuildGraphFromOsm(string filePath);
+//        Graph TryRepairWithExtendedFile(Graph disconnectedGraph, Dictionary<long, (double lat, double lon)> originalNodes, string extendedFilePath);
+//    }
+//}
 using DTO;
 using System.Collections.Generic;
 
@@ -37,7 +50,16 @@ namespace IBL
 {
     public interface IGraphService
     {
-        Graph BuildGraphFromOsm(string filePath);
-        Graph TryRepairWithExtendedFile(Graph disconnectedGraph, Dictionary<long, (double lat, double lon)> originalNodes, string extendedFilePath);
+        // בנייה מנתוני צמתים וקשתות
+        Graph BuildGraphFromOsm(Dictionary<long, (double lat, double lon)> nodes, List<(long from, long to)> edges);
+
+        // בנייה מקובץ PBF
+        Graph BuildGraphFromOsm(string pbfFilePath);
+
+        // תיקון גרף עם קובץ PBF נוסף
+        Graph TryRepairWithExtendedFile(Graph originalGraph, Dictionary<long, (double lat, double lon)> originalNodes, string pbfFilePath);
+
+        // תיקון גרף עם נתוני צמתים וקשתות נוספים
+        Graph TryRepairWithExtendedFile(Graph originalGraph, Dictionary<long, (double lat, double lon)> originalNodes, Dictionary<long, (double lat, double lon)> additionalNodes, List<(long from, long to)> additionalEdges);
     }
 }

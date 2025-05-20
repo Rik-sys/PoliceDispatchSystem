@@ -10,9 +10,17 @@ namespace BLL
 {
     public class KCenterService : IKCenterService
     {
-        public List<long> SolveKCenter(Graph graph, int k)
+        public (List<long> centers, double maxResponseTime) SolveKCenter(Graph graph, int k)
         {
-            throw new NotImplementedException();
+            var solver = new KCenterSolver(graph);
+            var (centers, radius) = solver.Solve(k);
+
+            // המרה של מרחק (מטרים) לזמן תגובה (שניות)
+            const double averageSpeed = 10.0; // מטר לשנייה
+            double maxResponseTime = radius / averageSpeed;
+
+            return (centers, maxResponseTime);
         }
+
     }
 }

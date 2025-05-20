@@ -26,6 +26,8 @@ namespace PoliceDispatchSystem
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IGraphService, GraphService>();
+            builder.Services.AddScoped<IKCenterService, KCenterService>();
+
 
 
             var app = builder.Build();

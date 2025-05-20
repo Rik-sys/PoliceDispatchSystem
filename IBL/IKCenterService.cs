@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 namespace IBL
 {
     public interface IKCenterService
-    {
-        List<long> SolveKCenter(Graph graph, int k);
+    {      
+        (List<long> centers, double maxResponseTime) SolveKCenter(Graph graph, int k);
+       // List<long> FindMinimumOfficersForResponseTime(Graph graph, double maxResponseTime);
     }
 }
