@@ -158,6 +158,29 @@ namespace DTO
                 };
             }
         }
+        public Graph FilterNodes(HashSet<long> allowedNodes)
+        {
+            var filteredGraph = new Graph();
+
+            // Add only allowed nodes
+            foreach (var nodeId in allowedNodes)
+            {
+                if (Nodes.ContainsKey(nodeId))
+                {
+                    filteredGraph.Nodes[nodeId] = Nodes[nodeId];
+                }
+            }
+
+            // Add edges for the filtered nodes
+            foreach (var node in filteredGraph.Nodes.Values)
+            {
+                node.Edges = node.Edges.Where(edge => filteredGraph.Nodes.ContainsKey(edge.To.Id)).ToList();
+
+            }
+
+            return filteredGraph;
+        }
 
     }
+
 }
