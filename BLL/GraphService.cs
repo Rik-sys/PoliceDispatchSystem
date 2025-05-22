@@ -577,6 +577,7 @@ namespace BLL
             double? minLat = null, double? maxLat = null,
             double? minLon = null, double? maxLon = null)
         {
+
             var (nodes, edges) = OsmFileReader.LoadOsmData(pbfFilePath, minLat, maxLat, minLon, maxLon);
             return BuildGraphFromOsm(nodes, edges);
         }
@@ -593,6 +594,8 @@ namespace BLL
 
             // טעינת הגרף המורחב - ללא מגבלות תחום כדי לקבל את כל הנתונים
             var (fullNodes, fullEdges) = OsmFileReader.LoadOsmData(extendedFilePath);
+
+
 
             // שימוש ב-OsmGraphRepairer לחיבור המרכיבים
             var allAddedEdges = new List<(long from, long to)>();
