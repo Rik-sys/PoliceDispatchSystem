@@ -11,9 +11,9 @@ public partial class PoliceOfficer
 
     public virtual ICollection<CallAssignment> CallAssignments { get; set; } = new List<CallAssignment>();
 
+    public virtual ICollection<OfficerAssignment> OfficerAssignments { get; set; } = new List<OfficerAssignment>();
+
     public virtual User PoliceOfficerNavigation { get; set; } = null!;
 
     public virtual VehicleType? VehicleType { get; set; }
-
-    public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 }

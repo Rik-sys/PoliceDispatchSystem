@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    internal class EventZone
+    public class EventZoneDTO
     {
         public int ZoneId { get; set; }
 
@@ -28,6 +28,6 @@ namespace DTO
 
         public double Longitude4 { get; set; }
 
-        public virtual Event? Event { get; set; }
+        public virtual EventDTO? Event { get; set; }
     }
 }

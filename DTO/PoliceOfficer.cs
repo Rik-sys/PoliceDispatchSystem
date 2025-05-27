@@ -16,6 +16,6 @@ namespace DTO
 
         public virtual VehicleType? VehicleType { get; set; }
 
-        public virtual ICollection<Event> Events { get; set; } = new List<Event>();
+        public virtual ICollection<EventDTO> Events { get; set; } = new List<EventDTO>();
     }
 }

@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DBEntities\DBEntities.csproj" />
+    <ProjectReference Include="..\DTO\DTO.csproj" />
   </ItemGroup>
 
 </Project>

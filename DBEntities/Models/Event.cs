@@ -17,11 +17,15 @@ public partial class Event
 
     public int RequiredOfficers { get; set; }
 
+    public string? Description { get; set; }
+
+    public string? Priority { get; set; }
+
     public virtual ICollection<Call> Calls { get; set; } = new List<Call>();
 
     public virtual ICollection<EventZone> EventZones { get; set; } = new List<EventZone>();
 
-    public virtual ICollection<StrategicZone> StrategicZones { get; set; } = new List<StrategicZone>();
+    public virtual ICollection<OfficerAssignment> OfficerAssignments { get; set; } = new List<OfficerAssignment>();
 
-    public virtual ICollection<PoliceOfficer> PoliceOfficers { get; set; } = new List<PoliceOfficer>();
+    public virtual ICollection<StrategicZone> StrategicZones { get; set; } = new List<StrategicZone>();
 }

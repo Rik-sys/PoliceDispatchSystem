@@ -1,6 +1,10 @@
 
 using BLL;
+using DAL;
+using DBEntities.Models;
 using IBL;
+using IDAL;
+using Microsoft.EntityFrameworkCore;
 
 namespace PoliceDispatchSystem
 {
@@ -27,6 +31,11 @@ namespace PoliceDispatchSystem
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IGraphService, GraphService>();
             builder.Services.AddScoped<IKCenterService, KCenterService>();
+            builder.Services.AddScoped<IEventDAL, EventDAL>();
+            builder.Services.AddScoped<IEventService, EventService>();
+
+            builder.Services.AddDbContext<PoliceDispatchSystemContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 

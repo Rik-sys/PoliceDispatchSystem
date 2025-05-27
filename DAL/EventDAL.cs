@@ -1,5 +1,4 @@
-﻿using DAL.Models;
-using DBEntities.Models;
+﻿using DBEntities.Models;
 using IDAL;
 
 namespace DAL
@@ -26,9 +25,9 @@ namespace DAL
             _context.SaveChanges();
         }
 
-        public Event? GetEventById(int id)
+        public Event? GetEventById(int eventId)
         {
-            return _context.Events.FirstOrDefault(e => e.EventId == id);
+            return _context.Events.FirstOrDefault(e => e.EventId == eventId);
         }
     }
 }

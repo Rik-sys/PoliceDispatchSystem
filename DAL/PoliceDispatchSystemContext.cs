@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using DBEntities.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DAL.Models;
+namespace DBEntities.Models;
 
 public partial class PoliceDispatchSystemContext : DbContext
 {
@@ -25,6 +24,8 @@ public partial class PoliceDispatchSystemContext : DbContext
     public virtual DbSet<Event> Events { get; set; }
 
     public virtual DbSet<EventZone> EventZones { get; set; }
+
+    public virtual DbSet<OfficerAssignment> OfficerAssignments { get; set; }
 
     public virtual DbSet<PoliceOfficer> PoliceOfficers { get; set; }
 
@@ -97,7 +98,9 @@ public partial class PoliceDispatchSystemContext : DbContext
             entity.HasKey(e => e.EventId).HasName("PK__Events__7944C870BCB8A487");
 
             entity.Property(e => e.EventId).HasColumnName("EventID");
+            entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.EventName).HasMaxLength(100);
+            entity.Property(e => e.Priority).HasMaxLength(20);
         });
 
         modelBuilder.Entity<EventZone>(entity =>
@@ -111,6 +114,22 @@ public partial class PoliceDispatchSystemContext : DbContext
                 .HasForeignKey(d => d.EventId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK__EventZone__Event__59063A47");
+        });
+
+        modelBuilder.Entity<OfficerAssignment>(entity =>
+        {
+            entity.HasKey(e => new { e.PoliceOfficerId, e.EventId }).HasName("PK__OfficerA__2B9AF0BA658CC852");
+
+            entity.Property(e => e.PoliceOfficerId).HasColumnName("PoliceOfficerID");
+            entity.Property(e => e.EventId).HasColumnName("EventID");
+
+            entity.HasOne(d => d.Event).WithMany(p => p.OfficerAssignments)
+                .HasForeignKey(d => d.EventId)
+                .HasConstraintName("FK__OfficerAs__Event__66603565");
+
+            entity.HasOne(d => d.PoliceOfficer).WithMany(p => p.OfficerAssignments)
+                .HasForeignKey(d => d.PoliceOfficerId)
+                .HasConstraintName("FK__OfficerAs__Polic__656C112C");
         });
 
         modelBuilder.Entity<PoliceOfficer>(entity =>
@@ -130,23 +149,6 @@ public partial class PoliceDispatchSystemContext : DbContext
             entity.HasOne(d => d.VehicleType).WithMany(p => p.PoliceOfficers)
                 .HasForeignKey(d => d.VehicleTypeId)
                 .HasConstraintName("FK__PoliceOff__Vehic__5441852A");
-
-            entity.HasMany(d => d.Events).WithMany(p => p.PoliceOfficers)
-                .UsingEntity<Dictionary<string, object>>(
-                    "OfficerAssignment",
-                    r => r.HasOne<Event>().WithMany()
-                        .HasForeignKey("EventId")
-                        .HasConstraintName("FK__OfficerAs__Event__66603565"),
-                    l => l.HasOne<PoliceOfficer>().WithMany()
-                        .HasForeignKey("PoliceOfficerId")
-                        .HasConstraintName("FK__OfficerAs__Polic__656C112C"),
-                    j =>
-                    {
-                        j.HasKey("PoliceOfficerId", "EventId").HasName("PK__OfficerA__2B9AF0BA658CC852");
-                        j.ToTable("OfficerAssignments");
-                        j.IndexerProperty<int>("PoliceOfficerId").HasColumnName("PoliceOfficerID");
-                        j.IndexerProperty<int>("EventId").HasColumnName("EventID");
-                    });
         });
 
         modelBuilder.Entity<StrategicZone>(entity =>

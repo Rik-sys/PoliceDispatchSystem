@@ -1,5 +1,4 @@
-﻿using DAL.Models;
-using DBEntities.Models;
+﻿using DBEntities.Models;
 using IDAL;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -39,10 +38,11 @@ namespace DAL
                 using PoliceDispatchSystemContext context = new PoliceDispatchSystemContext();
                 return context.Users.Select(u => (User)u).ToList();
             }
-            catch {
+            catch
+            {
                 return null;
             }
         }
     }
-    
+
 }
