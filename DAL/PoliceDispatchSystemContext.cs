@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace DBEntities.DBEntities.Models;
+namespace DBEntities.Models;
 
 public partial class PoliceDispatchSystemContext : DbContext
 {

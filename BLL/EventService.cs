@@ -72,10 +72,10 @@
 //    }
 //}
 using AutoMapper;
-using DBEntities.Models;
 using DTO;
 using IBL;
 using IDAL;
+using DBEntities.Models;
 
 namespace BLL
 {
@@ -96,7 +96,7 @@ namespace BLL
                 cfg.CreateMap<EventZoneDTO, EventZone>().ReverseMap();
 
                 // מיפוי של User (DTO ← → Entity)
-                cfg.CreateMap<UserDTO, DBEntities.Models.User>().ReverseMap();
+                cfg.CreateMap<UserDTO, User>().ReverseMap();
 
                 // מיפוי של PoliceOfficer עם User מקונן
                 cfg.CreateMap<PoliceOfficer, PoliceOfficerDTO>()
