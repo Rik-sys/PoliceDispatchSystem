@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    internal class Dispatcher
+    public class DispatcherDTO
     {
         public int DispatcherId { get; set; }
 
-        public virtual User DispatcherNavigation { get; set; } = null!;
+        public virtual UserDTO DispatcherNavigation { get; set; } = null!;
     }
 }

@@ -34,6 +34,12 @@ namespace PoliceDispatchSystem
             builder.Services.AddScoped<IEventDAL, EventDAL>();
             builder.Services.AddScoped<IEventService, EventService>();
 
+            builder.Services.AddScoped<IOfficerAssignmentDAL, OfficerAssignmentDAL>();
+            builder.Services.AddScoped<IOfficerAssignmentService, OfficerAssignmentService>();
+            builder.Services.AddScoped<IPoliceOfficerDAL, PoliceOfficerDAL>();
+            builder.Services.AddScoped<IUserDAL, UserDAL>();
+            
+
             builder.Services.AddDbContext<PoliceDispatchSystemContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

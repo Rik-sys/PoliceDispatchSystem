@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    internal class Call
+    public class CallDTO
     {
         public int CallId { get; set; }
 

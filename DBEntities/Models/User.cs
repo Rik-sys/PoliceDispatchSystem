@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DBEntities.Models;
+namespace DBEntities.DBEntities.Models;
 
 public partial class User
 {

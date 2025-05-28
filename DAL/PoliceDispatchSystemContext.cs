@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace DBEntities.Models;
+namespace DBEntities.DBEntities.Models;
 
 public partial class PoliceDispatchSystemContext : DbContext
 {
@@ -46,7 +46,6 @@ public partial class PoliceDispatchSystemContext : DbContext
             entity.HasKey(e => e.CallId).HasName("PK__Calls__5180CF8AEB5F44F5");
 
             entity.Property(e => e.CallId).HasColumnName("CallID");
-            entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.CallTime)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");

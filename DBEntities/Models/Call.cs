@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DBEntities.Models;
+namespace DBEntities.DBEntities.Models;
 
 public partial class Call
 {
     public int CallId { get; set; }
 
     public int? EventId { get; set; }
-
-    public string Address { get; set; } = null!;
 
     public int RequiredOfficers { get; set; }
 
@@ -20,6 +18,10 @@ public partial class Call
     public DateTime CallTime { get; set; }
 
     public string Status { get; set; } = null!;
+
+    public double Latitude { get; set; }
+
+    public double Longitude { get; set; }
 
     public virtual ICollection<CallAssignment> CallAssignments { get; set; } = new List<CallAssignment>();
 
