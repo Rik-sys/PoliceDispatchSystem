@@ -53,7 +53,7 @@
 
 ### דרישות:
 - Node.js + pnpm / npm
-- .NET 6 או 7
+- .NET 8
 - Overpass API (או חיבור אינטרנטי אליו)
 - גישה ל־localhost ב־7163
 
