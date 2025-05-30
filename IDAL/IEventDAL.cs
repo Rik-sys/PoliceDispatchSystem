@@ -7,5 +7,7 @@ namespace IDAL
         int AddEvent(Event eventEntity);
         void AddEventZone(EventZone zone);
         Event? GetEventById(int eventId);
+
+        List<Event> GetEvents();
     }
 }

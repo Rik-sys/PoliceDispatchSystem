@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-//ניסוי פיזור בתחום
 namespace DTO
 {
     public class Graph
@@ -114,7 +113,6 @@ namespace DTO
         {
             var filteredGraph = new Graph();
 
-            // Add only allowed nodes
             foreach (var nodeId in allowedNodes)
             {
                 if (Nodes.ContainsKey(nodeId))
@@ -123,7 +121,6 @@ namespace DTO
                 }
             }
 
-            // Add edges for the filtered nodes
             foreach (var node in filteredGraph.Nodes.Values)
             {
                 node.Edges = node.Edges.Where(edge => filteredGraph.Nodes.ContainsKey(edge.To.Id)).ToList();

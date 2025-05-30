@@ -11,6 +11,7 @@
 
 //    }
 //}
+using DBEntities.Models;
 using DTO;
 
 namespace IBL
@@ -20,5 +21,7 @@ namespace IBL
         int CreateEventWithZone(EventDTO eventDto, EventZoneDTO zoneDto);
         EventDTO GetEventById(int eventId);
         List<PoliceOfficerDTO> GetAvailableOfficersForEvent(DateOnly date, TimeOnly start, TimeOnly end); // חזרה ל-DTO הקיים
+        void DeleteEvent(int eventId);
+        public List<EventDTO> GetEvents();
     }
 }

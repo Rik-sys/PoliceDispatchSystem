@@ -29,5 +29,11 @@ namespace DAL
         {
             return _context.Events.FirstOrDefault(e => e.EventId == eventId);
         }
+
+        public List<Event> GetEvents()
+        {
+            return _context.Events.ToList();
+        }
+
     }
 }

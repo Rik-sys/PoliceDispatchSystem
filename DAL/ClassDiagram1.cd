@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="DAL.CallAssignmentDAL">
+    <Position X="4.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAgAAAAEAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>CallAssignmentDAL.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DAL.EventDAL">
+    <Position X="7.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABABAAAAAAIIAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EventDAL.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DAL.OfficerAssignmentDAL">
+    <Position X="7.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAgAAAEAAAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>OfficerAssignmentDAL.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DAL.OsmFileReader">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>OsmFileReader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DAL.OsmGraphRepairer">
+    <Position X="6" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEgkAAAAAIAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>OsmGraphRepairer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DAL.PoliceOfficerDAL">
+    <Position X="4.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAABACAAAAAAAAAAAAAAAAAAABAAAAAAAA=</HashCode>
+      <FileName>PoliceOfficerDAL.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9.6" />
+</ClassDiagram>

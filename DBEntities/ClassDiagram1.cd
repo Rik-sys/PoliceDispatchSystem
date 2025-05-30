@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="DBEntities.Models.Call">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAkAEAAAAAAAAAIAAAAAwAEBAAAAACAAAAIAAA=</HashCode>
+      <FileName>Models\Call.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.CallAssignment">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEQBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAIAAA=</HashCode>
+      <FileName>Models\CallAssignment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.Dispatcher">
+    <Position X="11" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQA=</HashCode>
+      <FileName>Models\Dispatcher.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.Event">
+    <Position X="11" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgCAAAAgAAAgAAAEAAAAAAgAIIAgAAAAAACAgABAAAA=</HashCode>
+      <FileName>Models\Event.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.EventZone">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAiAAAAAAAAAAAIAABAOgAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\EventZone.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.OfficerAssignment">
+    <Position X="7.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAgAEAAAAAAAAAIAAAAAgAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>Models\OfficerAssignment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.PoliceOfficer">
+    <Position X="3.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IACAAAAAAAAAAAAAAAAAAAAAAAgEAAAAAAAAgAACAAA=</HashCode>
+      <FileName>Models\PoliceOfficer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.StrategicZone">
+    <Position X="9.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAgAEAAAAAAAAAIAAAAAgAAACAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\StrategicZone.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.User">
+    <Position X="9.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAABAAACAAAAAAAQAAAAgAAACAAAAAAAAAIABAAAA=</HashCode>
+      <FileName>Models\User.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DBEntities.Models.VehicleType">
+    <Position X="5.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACQAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\VehicleType.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9.6" />
+</ClassDiagram>

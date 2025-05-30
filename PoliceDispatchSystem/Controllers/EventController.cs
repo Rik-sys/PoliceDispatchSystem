@@ -135,11 +135,155 @@
 //        public List<List<double>> SelectedArea { get; set; } = new(); // 4 נקודות [lat, lon]
 //    }
 //}
+
+
+//אחרון
+//using Microsoft.AspNetCore.Mvc;
+//using DTO;
+//using DBEntities.Models;
+//using IBL;
+//using PoliceDispatchSystem.Controllers;
+
+//namespace PoliceDispatchSystem.API
+//{
+//    [Route("api/[controller]")]
+//    [ApiController]
+//    public class EventController : ControllerBase
+//    {
+//        private readonly IEventService _eventService;
+//        private readonly IKCenterService _kCenterService;
+//        private readonly IOfficerAssignmentService _officerAssignmentService; // הוספה חדשה
+
+//        public EventController(
+//            IEventService eventService,
+//            IKCenterService kCenterService,
+//            IOfficerAssignmentService officerAssignmentService) // הוספה חדשה
+//        {
+//            _eventService = eventService;
+//            _kCenterService = kCenterService;
+//            _officerAssignmentService = officerAssignmentService; // הוספה חדשה
+//        }
+
+//        [HttpPost("create")]
+//        public IActionResult CreateEvent([FromBody] CreateEventRequest request)
+//        {
+//            if (GraphController.LatestGraph == null || GraphController.LatestNodes == null)
+//                return BadRequest("אין גרף טעון במערכת.");
+
+//            if (request.SelectedArea == null || request.SelectedArea.Count < 4)
+//                return BadRequest("נדרשות לפחות 4 נקודות לתחום האירוע.");
+
+//            // 1. המרת הבקשה ל־DTO
+//            var eventDto = new EventDTO
+//            {
+//                EventName = request.Name,
+//                Description = request.Description,
+//                Priority = request.Priority,
+//                EventDate = DateOnly.FromDateTime(DateTime.Parse(request.StartDate)),
+//                StartTime = TimeOnly.Parse(request.StartTime),
+//                EndTime = TimeOnly.Parse(request.EndTime),
+//                RequiredOfficers = request.RequiredOfficers
+//            };
+
+//            var zoneDto = new EventZoneDTO
+//            {
+//                Latitude1 = request.SelectedArea[0][0],
+//                Longitude1 = request.SelectedArea[0][1],
+//                Latitude2 = request.SelectedArea[1][0],
+//                Longitude2 = request.SelectedArea[1][1],
+//                Latitude3 = request.SelectedArea[2][0],
+//                Longitude3 = request.SelectedArea[2][1],
+//                Latitude4 = request.SelectedArea[3][0],
+//                Longitude4 = request.SelectedArea[3][1]
+//            };
+
+//            // 2. שמירה במסד
+//            int eventId = _eventService.CreateEventWithZone(eventDto, zoneDto);
+
+//            // 3. סינון צמתים בתחום
+//            var nodesInBounds = GraphController.NodesInOriginalBounds
+//                .Where(kvp => kvp.Value == true)
+//                .Select(kvp => kvp.Key)
+//                .ToHashSet();
+
+//            // 4. פיזור K-Center
+//            var result = _kCenterService.DistributePolice(GraphController.LatestGraph, request.RequiredOfficers, nodesInBounds);
+//            var selectedNodeIds = result.CenterNodes;
+
+//            var nodeToCoord = GraphController.LatestNodes;
+
+//            // 5. שליפת כל השוטרים הפנויים (עכשיו מחזיר DTO)
+//            var availableOfficers = _eventService.GetAvailableOfficersForEvent(
+//                eventDto.EventDate,
+//                eventDto.StartTime,
+//                eventDto.EndTime
+//            );
+
+//            // 6. יצירת רשימת DTOs לשיוכים במקום עבודה ישירה על Entity
+//            var assignmentDtos = new List<OfficerAssignmentDTO>();
+
+//            foreach (var nodeId in selectedNodeIds)
+//            {
+//                if (!nodeToCoord.TryGetValue(nodeId, out var coord))
+//                    continue;
+
+//                // מציאת השוטר הכי קרוב שלא שובץ עדיין
+//                var availableOfficer = availableOfficers
+//                    .Where(o => !assignmentDtos.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
+//                    .OrderBy(o => GetDistanceFromOfficer(o, coord.lat, coord.lon))
+//                    .FirstOrDefault();
+
+//                if (availableOfficer != null)
+//                {
+//                    // יצירת DTO במקום Entity
+//                    assignmentDtos.Add(new OfficerAssignmentDTO
+//                    {
+//                        PoliceOfficerId = availableOfficer.PoliceOfficerId,
+//                        EventId = eventId,
+//                        Latitude = coord.lat,
+//                        Longitude = coord.lon
+//                    });
+//                }
+//            }
+
+//            // 7. שמירת השיוכים דרך שכבת השירות (BLL)
+//            _officerAssignmentService.AddOfficerAssignments(assignmentDtos);
+
+//            return Ok(new
+//            {
+//                EventId = eventId,
+//                OfficerCount = assignmentDtos.Count,
+//                Message = "אירוע נוצר בהצלחה ושובצו שוטרים"
+//            });
+//        }
+
+//        private double GetDistanceFromOfficer(PoliceOfficerDTO officer, double lat, double lon)
+//        {
+//            return 0; // כאן תצטרך להוסיף חישוב מרחק אמיתי
+//        }
+//    }
+
+//    public class CreateEventRequest
+//    {
+//        public string Name { get; set; } = "";
+//        public string Description { get; set; } = "";
+//        public string Priority { get; set; } = "";
+//        public string StartDate { get; set; } = "";
+//        public string EndDate { get; set; } = "";
+//        public string StartTime { get; set; } = "";
+//        public string EndTime { get; set; } = "";
+//        public int RequiredOfficers { get; set; }
+
+//        public List<List<double>> SelectedArea { get; set; } = new(); // 4 נקודות [lat, lon]
+//    }
+//}
+
 using Microsoft.AspNetCore.Mvc;
 using DTO;
 using DBEntities.Models;
 using IBL;
 using PoliceDispatchSystem.Controllers;
+using BLL;
 
 namespace PoliceDispatchSystem.API
 {
@@ -149,16 +293,16 @@ namespace PoliceDispatchSystem.API
     {
         private readonly IEventService _eventService;
         private readonly IKCenterService _kCenterService;
-        private readonly IOfficerAssignmentService _officerAssignmentService; // הוספה חדשה
+        private readonly IOfficerAssignmentService _officerAssignmentService;
 
         public EventController(
             IEventService eventService,
             IKCenterService kCenterService,
-            IOfficerAssignmentService officerAssignmentService) // הוספה חדשה
+            IOfficerAssignmentService officerAssignmentService)
         {
             _eventService = eventService;
             _kCenterService = kCenterService;
-            _officerAssignmentService = officerAssignmentService; // הוספה חדשה
+            _officerAssignmentService = officerAssignmentService;
         }
 
         [HttpPost("create")]
@@ -197,26 +341,29 @@ namespace PoliceDispatchSystem.API
             // 2. שמירה במסד
             int eventId = _eventService.CreateEventWithZone(eventDto, zoneDto);
 
-            // 3. סינון צמתים בתחום
+            // 3. שמירת הגרף והצמתים לפי מזהה האירוע
+            GraphController.SaveGraphForEvent(eventId, GraphController.LatestGraph, GraphController.LatestNodes, GraphController.NodesInOriginalBounds);
+
+            // 4. סינון צמתים בתחום
             var nodesInBounds = GraphController.NodesInOriginalBounds
                 .Where(kvp => kvp.Value == true)
                 .Select(kvp => kvp.Key)
                 .ToHashSet();
 
-            // 4. פיזור K-Center
+            // 5. פיזור K-Center
             var result = _kCenterService.DistributePolice(GraphController.LatestGraph, request.RequiredOfficers, nodesInBounds);
             var selectedNodeIds = result.CenterNodes;
 
             var nodeToCoord = GraphController.LatestNodes;
 
-            // 5. שליפת כל השוטרים הפנויים (עכשיו מחזיר DTO)
+            // 6. שליפת כל השוטרים הפנויים
             var availableOfficers = _eventService.GetAvailableOfficersForEvent(
                 eventDto.EventDate,
                 eventDto.StartTime,
                 eventDto.EndTime
             );
 
-            // 6. יצירת רשימת DTOs לשיוכים במקום עבודה ישירה על Entity
+            // 7. יצירת רשימת DTOs לשיוכים
             var assignmentDtos = new List<OfficerAssignmentDTO>();
 
             foreach (var nodeId in selectedNodeIds)
@@ -224,7 +371,6 @@ namespace PoliceDispatchSystem.API
                 if (!nodeToCoord.TryGetValue(nodeId, out var coord))
                     continue;
 
-                // מציאת השוטר הכי קרוב שלא שובץ עדיין
                 var availableOfficer = availableOfficers
                     .Where(o => !assignmentDtos.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
                     .OrderBy(o => GetDistanceFromOfficer(o, coord.lat, coord.lon))
@@ -232,7 +378,6 @@ namespace PoliceDispatchSystem.API
 
                 if (availableOfficer != null)
                 {
-                    // יצירת DTO במקום Entity
                     assignmentDtos.Add(new OfficerAssignmentDTO
                     {
                         PoliceOfficerId = availableOfficer.PoliceOfficerId,
@@ -243,7 +388,7 @@ namespace PoliceDispatchSystem.API
                 }
             }
 
-            // 7. שמירת השיוכים דרך שכבת השירות (BLL)
+            // 8. שמירת השיוכים דרך שכבת השירות
             _officerAssignmentService.AddOfficerAssignments(assignmentDtos);
 
             return Ok(new
@@ -254,11 +399,39 @@ namespace PoliceDispatchSystem.API
             });
         }
 
+        [HttpDelete("{eventId}")]
+        public IActionResult DeleteEvent(int eventId)
+        {
+            try
+            {
+                // מחיקת האירוע מהמסד
+                _eventService.DeleteEvent(eventId);
+
+                // מחיקת הגרף השמור עבור האירוע
+                GraphController.RemoveGraphForEvent(eventId);
+
+                return Ok(new { Message = "האירוע נמחק בהצלחה" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"שגיאה במחיקת האירוע: {ex.Message}");
+            }
+        }
+
         private double GetDistanceFromOfficer(PoliceOfficerDTO officer, double lat, double lon)
         {
             return 0; // כאן תצטרך להוסיף חישוב מרחק אמיתי
         }
+
+        [HttpGet("allEvents")]
+        public IActionResult GetAllEvents()
+        {
+            var allEvents = _eventService.GetEvents();
+            return Ok(allEvents);
     }
+    }
+
+   
 
     public class CreateEventRequest
     {
@@ -270,7 +443,6 @@ namespace PoliceDispatchSystem.API
         public string StartTime { get; set; } = "";
         public string EndTime { get; set; } = "";
         public int RequiredOfficers { get; set; }
-
-        public List<List<double>> SelectedArea { get; set; } = new(); // 4 נקודות [lat, lon]
+        public List<List<double>> SelectedArea { get; set; } = new();
     }
 }

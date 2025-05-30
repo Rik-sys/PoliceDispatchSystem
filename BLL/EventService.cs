@@ -134,5 +134,14 @@ namespace BLL
             // המרה ל-DTO הקיים
             return _mapper.Map<List<PoliceOfficerDTO>>(availableOfficers);
         }
+
+        public void DeleteEvent(int eventId)
+        {
+            throw new NotImplementedException();
+        }
+        public List<EventDTO> GetEvents()
+        {
+            return _eventDal.GetEvents().Select(ev => _mapper.Map<EventDTO>(ev)).ToList();
+        }
     }
 }

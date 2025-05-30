@@ -12,8 +12,6 @@ namespace DTO
 
         public int? EventId { get; set; }
 
-        public string Address { get; set; } = null!;
-
         public int RequiredOfficers { get; set; }
 
         public string ContactPhone { get; set; } = null!;
@@ -23,6 +21,10 @@ namespace DTO
         public DateTime CallTime { get; set; }
 
         public string Status { get; set; } = null!;
+
+        public double Latitude { get; set; }
+
+        public double Longitude { get; set; }
 
     }
 }

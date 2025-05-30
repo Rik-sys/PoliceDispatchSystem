@@ -14,8 +14,17 @@ namespace DAL
 
         public void AddAssignments(List<OfficerAssignment> list)
         {
-            _context.OfficerAssignments.AddRange(list);
+            foreach (var assignment in list)
+            {
+                if (!_context.OfficerAssignments.Any(a =>
+                    a.PoliceOfficerId == assignment.PoliceOfficerId &&
+                    a.EventId == assignment.EventId))
+                {
+                    _context.OfficerAssignments.Add(assignment);
+                }
+            }
             _context.SaveChanges();
+
         }
 
         public List<OfficerAssignment> GetAssignmentsByEventId(int eventId)

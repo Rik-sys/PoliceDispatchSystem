@@ -1,6 +1,7 @@
 
 using BLL;
 using DAL;
+using DAL.DAL;
 using DBEntities.Models;
 using IBL;
 using IDAL;
@@ -38,7 +39,12 @@ namespace PoliceDispatchSystem
             builder.Services.AddScoped<IOfficerAssignmentService, OfficerAssignmentService>();
             builder.Services.AddScoped<IPoliceOfficerDAL, PoliceOfficerDAL>();
             builder.Services.AddScoped<IUserDAL, UserDAL>();
-            
+
+            builder.Services.AddScoped<ICallDAL, CallDAL>();
+            builder.Services.AddScoped<ICallAssignmentDAL, CallAssignmentDAL>();
+            builder.Services.AddScoped<ICallService, CallService>();
+            builder.Services.AddScoped<ICallAssignmentService, CallAssignmentService>();
+
 
             builder.Services.AddDbContext<PoliceDispatchSystemContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
