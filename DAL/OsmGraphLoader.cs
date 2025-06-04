@@ -1,9 +1,4 @@
-﻿// תלויות:
-// - OsmSharp
-// - System.Collections.Generic
-// - System.Linq
-// - System.IO
-
+﻿
 using OsmSharp;
 using OsmSharp.Streams;
 using System;

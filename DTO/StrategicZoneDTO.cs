@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    internal class StrategicZone
+    public class StrategicZoneDTO
     {
         public int StrategicZoneId { get; set; }
 
@@ -16,6 +16,7 @@ namespace DTO
 
         public double Longitude { get; set; }
 
-        public int StrategyLevel { get; set; }
+        public int StrategyLevel { get; set; } = 1;
     }
 }
+

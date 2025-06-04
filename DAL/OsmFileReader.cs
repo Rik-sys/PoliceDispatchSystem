@@ -25,7 +25,6 @@ namespace DAL
         {
             var allNodes = new Dictionary<long, (double lat, double lon)>();
             var edges = new List<(long from, long to)>();
-
             using (var fileStream = File.OpenRead(filePath))
             {
                 var source = new PBFOsmStreamSource(fileStream);
@@ -42,8 +41,7 @@ namespace DAL
                         }
                     }
                 }
-
-                fileStream.Position = 0; // קריאה שניה
+                fileStream.Position = 0;
                 var waySource = new PBFOsmStreamSource(fileStream);
                 foreach (var element in waySource)
                 {
@@ -66,13 +64,9 @@ namespace DAL
                     }
                 }
             }
-
             return (allNodes, edges);
         }
 
-        /// <summary>
-        /// קריאת קובץ OSM עם סינון לפי גבולות גיאוגרפיים
-        /// </summary>
         public static (Dictionary<long, (double lat, double lon)> nodes, List<(long from, long to)> edges)
             LoadOsmData(
                 string filePath,

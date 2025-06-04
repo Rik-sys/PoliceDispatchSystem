@@ -44,6 +44,9 @@ namespace PoliceDispatchSystem
             builder.Services.AddScoped<ICallAssignmentDAL, CallAssignmentDAL>();
             builder.Services.AddScoped<ICallService, CallService>();
             builder.Services.AddScoped<ICallAssignmentService, CallAssignmentService>();
+            builder.Services.AddScoped<IStrategicZoneBL, StrategicZoneBL>();
+            builder.Services.AddScoped<IStrategicZoneDAL, StrategicZoneDAL>();
+
 
 
             builder.Services.AddDbContext<PoliceDispatchSystemContext>(options =>

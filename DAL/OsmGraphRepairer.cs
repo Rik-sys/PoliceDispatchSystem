@@ -29,7 +29,6 @@ namespace DAL
             // חיפוש מסלול בגרף המורחב
             return Dijkstra(fullGraph, fullNodes, minPair.a, minPair.b);
         }
-
         private static (long a, long b, double dist) FindClosestPair(
             HashSet<long> componentA,
             HashSet<long> componentB,
@@ -37,7 +36,6 @@ namespace DAL
         {
             var minPair = (a: -1L, b: -1L, dist: double.MaxValue);
 
-            // אופטימיזציה: אם יש הרבה צמתים, דגום מהם רק חלק
             var sampleSizeA = Math.Min(componentA.Count, 100);
             var sampleSizeB = Math.Min(componentB.Count, 100);
 
@@ -62,7 +60,6 @@ namespace DAL
                     }
                 }
             }
-
             return minPair;
         }
 

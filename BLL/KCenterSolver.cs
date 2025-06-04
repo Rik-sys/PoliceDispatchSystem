@@ -22,7 +22,7 @@ namespace BLL
             _allDistances = _shortestPaths.Values.Distinct().OrderBy(x => x).ToList();
         }
 
-        //Finds the minimal radius for k-center clustering using Hochbaum & Shmoys algorithm
+        
         public (List<long> centers, double radius) Solve(int k)
         {
             if (k <= 0)
@@ -56,9 +56,7 @@ namespace BLL
                 {
                     low = mid + 1;
                 }
-
             }
-
             return (bestCenters, bestRadius);
         }
         private List<long> FindCentersWithRadius(double radius)
@@ -77,7 +75,6 @@ namespace BLL
                 centers.Add(nodeIds.First());
                 return centers;
             }
-
             while (remainingNodes.Count > 0)
             {
                 //לקחתי את הצומת הראשון כמרכז
@@ -104,13 +101,8 @@ namespace BLL
                         }
                     }
                 }
-
                 //הסרה של כל הצמתים שכוסו מרשימת הצמתים שעדיין לא כוסו
-                remainingNodes.ExceptWith(toRemove);
-
-            }
-            return centers;
-        }
+                remainingNodes.ExceptWith(toRemove); } return centers;}
 
         //הכנה של מטריצת מרחקים ע''י אלגוריתם דייקסטרה
         private Dictionary<(long, long), double> ComputeAllPairsShortestPaths(Graph graph)
@@ -145,8 +137,6 @@ namespace BLL
                         currentDistances[node.Id] = double.PositiveInfinity;
                     }
                 }
-
-
                 while (priorityQueue.Count > 0)
                 {
                     var minDistance = priorityQueue.Keys.First();
