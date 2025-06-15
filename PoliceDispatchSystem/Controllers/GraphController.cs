@@ -318,13 +318,16 @@ namespace PoliceDispatchSystem.Controllers
                 _eventGraphs.Remove(key);
             }
         }
+
+
+        //הקוטנרולר הראשי שמקבל קובץ OSM והופך לגרף קשיר ראשוני
         [HttpPost("upload-osm")]
         public ActionResult UploadInitialGraph(
-    IFormFile file,
-    [FromForm] double? minLat = null,
-    [FromForm] double? maxLat = null,
-    [FromForm] double? minLon = null,
-    [FromForm] double? maxLon = null)
+                                    IFormFile file,
+                                    [FromForm] double? minLat = null,
+                                    [FromForm] double? maxLat = null,
+                                    [FromForm] double? minLon = null,
+                                    [FromForm] double? maxLon = null)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("קובץ לא סופק");
@@ -346,7 +349,6 @@ namespace PoliceDispatchSystem.Controllers
                     LatestBounds = (minLat.Value, maxLat.Value, minLon.Value, maxLon.Value);
                 }
 
-                // ✅ שימוש בפונקציה המשודרגת של קלוד
                 var graph = OsmFileReader.LoadOsmDataToGraph(pbfPath, coord =>
                 {
                     return (!minLat.HasValue || coord.lat >= minLat.Value) &&
@@ -394,7 +396,7 @@ namespace PoliceDispatchSystem.Controllers
                         ImagePath = "graph_image.png",
                         ComponentCount = 1,
                         NodeCount = nodesData.Count,
-                        WaySegmentsCount = graph.WaySegments.Count // 🆕 מידע נוסף
+                        WaySegmentsCount = graph.WaySegments.Count //  מידע נוסף
                     });
                 }
                 else
@@ -406,7 +408,7 @@ namespace PoliceDispatchSystem.Controllers
                         Message = $"הגרף לא קשיר - נמצאו {components.Count} רכיבים קשירים. נא לטעון קובץ עם תחום רחב יותר",
                         ComponentCount = components.Count,
                         NodeCount = nodesData.Count,
-                        WaySegmentsCount = graph.WaySegments.Count // 🆕 מידע נוסף
+                        WaySegmentsCount = graph.WaySegments.Count //  מידע נוסף
                     });
                 }
             }
@@ -420,91 +422,6 @@ namespace PoliceDispatchSystem.Controllers
                     System.IO.File.Delete(tempOsmPath);
             }
         }
-
-        //[HttpPost("upload-osm")]
-        //public ActionResult UploadInitialGraph(
-        //    IFormFile file,
-        //    [FromForm] double? minLat = null,
-        //    [FromForm] double? maxLat = null,
-        //    [FromForm] double? minLon = null,
-        //    [FromForm] double? maxLon = null)
-        //{
-        //    if (file == null || file.Length == 0)
-        //        return BadRequest("קובץ לא סופק");
-
-        //    var tempOsmPath = Path.GetTempFileName();
-
-        //    try
-        //    {
-        //        using (var stream = System.IO.File.Create(tempOsmPath))
-        //        {
-        //            file.CopyTo(stream);
-        //        }
-
-        //        string pbfPath = OsmConversionService.ConvertOsmToPbf(tempOsmPath);
-
-        //        if (minLat.HasValue && maxLat.HasValue && minLon.HasValue && maxLon.HasValue)
-        //        {
-        //            LatestBounds = (minLat.Value, maxLat.Value, minLon.Value, maxLon.Value);
-        //        }
-
-        //        var (nodesData, edgesData) = OsmFileReader.LoadOsmData(
-        //            pbfPath,
-        //            minLat,
-        //            maxLat,
-        //            minLon,
-        //            maxLon);
-
-        //        var graph = _graphService.BuildGraphFromOsm(nodesData, edgesData);
-
-        //        LatestNodes = nodesData;
-        //        LatestGraph = graph;
-        //        DisplayGraph = graph;
-
-        //        NodesInOriginalBounds.Clear();
-        //        foreach (var nodeId in nodesData.Keys)
-        //        {
-        //            NodesInOriginalBounds[nodeId] = true;
-        //        }
-
-        //        KCenterController.SetLatestGraph(graph);
-        //        KCenterController.SetLatestNodes(nodesData);
-        //        KCenterController.SetNodesInOriginalBounds(NodesInOriginalBounds);
-
-        //        if (graph.IsConnected())
-        //        {
-        //            GraphToImageConverter.ConvertGraphToImage(graph);
-        //            return Ok(new
-        //            {
-        //                IsConnected = true,
-        //                Message = "הגרף קשיר, ניתן להמשיך לאלגוריתם פיזור השוטרים",
-        //                ImagePath = "graph_image.png",
-        //                ComponentCount = 1,
-        //                NodeCount = nodesData.Count
-        //            });
-        //        }
-        //        else
-        //        {
-        //            var components = graph.GetConnectedComponents();
-        //            return Ok(new
-        //            {
-        //                IsConnected = false,
-        //                Message = $"הגרף לא קשיר - נמצאו {components.Count} רכיבים קשירים. נא לטעון קובץ עם תחום רחב יותר",
-        //                ComponentCount = components.Count,
-        //                NodeCount = nodesData.Count
-        //            });
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest($"שגיאה: {ex.Message}");
-        //    }
-        //    finally
-        //    {
-        //        if (System.IO.File.Exists(tempOsmPath))
-        //            System.IO.File.Delete(tempOsmPath);
-        //    }
-        //}
 
         [HttpPost("repair-osm")]
         public ActionResult UploadExtendedOsm(IFormFile file)
@@ -643,3 +560,89 @@ namespace PoliceDispatchSystem.Controllers
         }
     }
 }
+
+
+//[HttpPost("upload-osm")]
+//public ActionResult UploadInitialGraph(
+//    IFormFile file,
+//    [FromForm] double? minLat = null,
+//    [FromForm] double? maxLat = null,
+//    [FromForm] double? minLon = null,
+//    [FromForm] double? maxLon = null)
+//{
+//    if (file == null || file.Length == 0)
+//        return BadRequest("קובץ לא סופק");
+
+//    var tempOsmPath = Path.GetTempFileName();
+
+//    try
+//    {
+//        using (var stream = System.IO.File.Create(tempOsmPath))
+//        {
+//            file.CopyTo(stream);
+//        }
+
+//        string pbfPath = OsmConversionService.ConvertOsmToPbf(tempOsmPath);
+
+//        if (minLat.HasValue && maxLat.HasValue && minLon.HasValue && maxLon.HasValue)
+//        {
+//            LatestBounds = (minLat.Value, maxLat.Value, minLon.Value, maxLon.Value);
+//        }
+
+//        var (nodesData, edgesData) = OsmFileReader.LoadOsmData(
+//            pbfPath,
+//            minLat,
+//            maxLat,
+//            minLon,
+//            maxLon);
+
+//        var graph = _graphService.BuildGraphFromOsm(nodesData, edgesData);
+
+//        LatestNodes = nodesData;
+//        LatestGraph = graph;
+//        DisplayGraph = graph;
+
+//        NodesInOriginalBounds.Clear();
+//        foreach (var nodeId in nodesData.Keys)
+//        {
+//            NodesInOriginalBounds[nodeId] = true;
+//        }
+
+//        KCenterController.SetLatestGraph(graph);
+//        KCenterController.SetLatestNodes(nodesData);
+//        KCenterController.SetNodesInOriginalBounds(NodesInOriginalBounds);
+
+//        if (graph.IsConnected())
+//        {
+//            GraphToImageConverter.ConvertGraphToImage(graph);
+//            return Ok(new
+//            {
+//                IsConnected = true,
+//                Message = "הגרף קשיר, ניתן להמשיך לאלגוריתם פיזור השוטרים",
+//                ImagePath = "graph_image.png",
+//                ComponentCount = 1,
+//                NodeCount = nodesData.Count
+//            });
+//        }
+//        else
+//        {
+//            var components = graph.GetConnectedComponents();
+//            return Ok(new
+//            {
+//                IsConnected = false,
+//                Message = $"הגרף לא קשיר - נמצאו {components.Count} רכיבים קשירים. נא לטעון קובץ עם תחום רחב יותר",
+//                ComponentCount = components.Count,
+//                NodeCount = nodesData.Count
+//            });
+//        }
+//    }
+//    catch (Exception ex)
+//    {
+//        return BadRequest($"שגיאה: {ex.Message}");
+//    }
+//    finally
+//    {
+//        if (System.IO.File.Exists(tempOsmPath))
+//            System.IO.File.Delete(tempOsmPath);
+//    }
+//}

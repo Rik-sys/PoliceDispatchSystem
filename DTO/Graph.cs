@@ -1,4 +1,5 @@
 ﻿
+//טוב רק לא תומך בקשתות חד כיווניות
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +9,18 @@ namespace DTO
 {
     public class Graph
     {
+        //מילון לגרף לוגי
         public Dictionary<long, Node> Nodes { get; set; } = new();
 
-        // 🆕 שמירת מידע על Ways לצורך פיצול
+        //שמירת מידע על Ways לצורך פיצול
+
         public List<WaySegment> WaySegments { get; set; } = new();
 
-        // מונה לצמתים חדשים
+        // מונה לצמתים חדשים-מתחיל גבוה כדי שלא יתנגש לי עם צמתים של OSM
         private static long _nextVirtualNodeId = 100_000_000_000L;
 
+
+        //הוספת קשת דו כיוונית-כלומר 2 קשתות, אחת מצומת ראשונה לשניה ואחת מצומת שניה לראשונה
         public void AddEdge(long from, long to, double weight = 1)
         {
             if (!Nodes.ContainsKey(from) || !Nodes.ContainsKey(to))
@@ -24,6 +29,8 @@ namespace DTO
             Nodes[to].Edges.Add(new Edge { To = Nodes[from], Weight = weight });
         }
 
+
+        //הוספת צומת לגרף
         public void AddNode(long nodeId, double lat, double lon)
         {
             if (!Nodes.ContainsKey(nodeId))
@@ -38,12 +45,11 @@ namespace DTO
             }
         }
 
-        /// <summary>
-        /// מוסיף מידע על קטע דרך לגרף
-        /// </summary>
+
+        // מוסיף מידע על קטע דרך לגרף
         public void AddWaySegment(long wayId, long fromNode, long toNode,
-            (double lat, double lon) fromCoord, (double lat, double lon) toCoord,
-            string highwayType)
+             (double lat, double lon) fromCoord, (double lat, double lon) toCoord,
+             string highwayType)
         {
             WaySegments.Add(new WaySegment
             {
@@ -56,12 +62,11 @@ namespace DTO
             });
         }
 
-        /// <summary>
-        /// יוצר צומת אסטרטגי על ה-Way הקרוב ביותר
-        /// </summary>
+        
+        /// יוצר צומת אסטרטגי על ה-Way הקרוב ביותר       
         public long CreateStrategicNodeOnWay(double latitude, double longitude, HashSet<long> allowedNodes)
         {
-            Console.WriteLine($"🔍 מחפש Way קרוב למיקום ({latitude}, {longitude})");
+            Console.WriteLine($" מחפש Way קרוב למיקום ({latitude}, {longitude})");
 
             // מציאת הקטע הקרוב ביותר
             var closestSegment = FindClosestWaySegment(latitude, longitude, allowedNodes);
@@ -370,131 +375,186 @@ namespace DTO
             }
             return filteredGraph;
         }
+
+
+        public void AddDirectedEdge(long from, long to, double weight = 1)
+        {
+            if (!Nodes.ContainsKey(from) || !Nodes.ContainsKey(to))
+                return;
+
+            Nodes[from].Edges.Add(new Edge { To = Nodes[to], Weight = weight });
+        }
+
+        public void AddOnewayEdge(long from, long to, double weight, bool allowReverse = true)
+        {
+            AddDirectedEdge(from, to, weight);
+
+            if (allowReverse && Config.AllowReverseDirection)
+            {
+                double penalizedWeight = weight * Config.ReverseDirectionPenalty;
+                AddDirectedEdge(to, from, penalizedWeight);
+
+                if (Config.VerboseOnewayLogging)
+                {
+                    Console.WriteLine($"🚧 חד־כיווני: {from}→{to} ({weight}), הפוך עם עונש: {to}→{from} ({penalizedWeight})");
+                }
+            }
+            else if (Config.VerboseOnewayLogging)
+            {
+                Console.WriteLine($"🚫 חד־כיווני חסום: {from}→{to} ({weight})");
+            }
+        }
+
     }
 }
-    //public class Graph
-    //{
-    //    public Dictionary<long, Node> Nodes { get; set; } = new();
 
-    //    public void AddEdge(long from, long to, double weight = 1)
-    //    {
-    //        if (!Nodes.ContainsKey(from) || !Nodes.ContainsKey(to))
-    //            return;
 
-    //        Nodes[from].Edges.Add(new Edge { To = Nodes[to], Weight = weight });
-    //        Nodes[to].Edges.Add(new Edge { To = Nodes[from], Weight = weight }); // דו-כיווני
-    //    }
 
-    //    public bool IsConnected()
-    //    {
-    //        if (!Nodes.Any()) return false;
 
-    //        var visited = new HashSet<long>();
-    //        var queue = new Queue<Node>();
-    //        var first = Nodes.Values.First();
-    //        queue.Enqueue(first);
-    //        visited.Add(first.Id);
 
-    //        while (queue.Any())
-    //        {
-    //            var current = queue.Dequeue();
-    //            foreach (var edge in current.Edges)
-    //            {
-    //                if (!visited.Contains(edge.To.Id))
-    //                {
-    //                    visited.Add(edge.To.Id);
-    //                    queue.Enqueue(edge.To);
-    //                }
-    //            }
-    //        }
 
-    //        return visited.Count == Nodes.Count;
-    //    }
 
-    //    public List<HashSet<long>> GetConnectedComponents()
-    //    {
-    //        var visited = new HashSet<long>();
-    //        var components = new List<HashSet<long>>();
 
-    //        foreach (var node in Nodes.Values)
-    //        {
-    //            if (!visited.Contains(node.Id))
-    //            {
-    //                var component = new HashSet<long>();
-    //                var stack = new Stack<Node>();
-    //                stack.Push(node);
 
-    //                while (stack.Any())
-    //                {
-    //                    var current = stack.Pop();
-    //                    if (!visited.Add(current.Id)) continue;
-    //                    component.Add(current.Id);
 
-    //                    foreach (var edge in current.Edges)
-    //                    {
-    //                        if (!visited.Contains(edge.To.Id))
-    //                            stack.Push(edge.To);
-    //                    }
-    //                }
 
-    //                components.Add(component);
-    //            }
-    //        }
 
-    //        return components;
-    //    }
 
-    //    public List<(long from, long to)> GetAllEdges()
-    //    {
-    //        var edges = new HashSet<(long, long)>();
 
-    //        foreach (var node in Nodes.Values)
-    //        {
-    //            foreach (var edge in node.Edges)
-    //            {
-    //                var a = node.Id;
-    //                var b = edge.To.Id;
-    //                if (a < b) edges.Add((a, b));
-    //                else edges.Add((b, a));
-    //            }
-    //        }
 
-    //        return edges.ToList();
-    //    }
 
-    //    public void AddNode(long nodeId, double lat, double lon)
-    //    {
-    //        if (!Nodes.ContainsKey(nodeId))
-    //        {
-    //            Nodes[nodeId] = new Node
-    //            {
-    //                Id = nodeId,
-    //                Latitude = lat,
-    //                Longitude = lon,
-    //                Edges = new List<Edge>()
-    //            };
-    //        }
-    //    }
-    //    public Graph FilterNodes(HashSet<long> allowedNodes)
-    //    {
-    //        var filteredGraph = new Graph();
 
-    //        foreach (var nodeId in allowedNodes)
-    //        {
-    //            if (Nodes.ContainsKey(nodeId))
-    //            {
-    //                filteredGraph.Nodes[nodeId] = Nodes[nodeId];
-    //            }
-    //        }
 
-    //        foreach (var node in filteredGraph.Nodes.Values)
-    //        {
-    //            node.Edges = node.Edges.Where(edge => filteredGraph.Nodes.ContainsKey(edge.To.Id)).ToList();
 
-    //        }
 
-    //        return filteredGraph;
-    //    }
 
-    //}
+
+
+
+
+//public class Graph
+//{
+//    public Dictionary<long, Node> Nodes { get; set; } = new();
+
+//    public void AddEdge(long from, long to, double weight = 1)
+//    {
+//        if (!Nodes.ContainsKey(from) || !Nodes.ContainsKey(to))
+//            return;
+
+//        Nodes[from].Edges.Add(new Edge { To = Nodes[to], Weight = weight });
+//        Nodes[to].Edges.Add(new Edge { To = Nodes[from], Weight = weight }); // דו-כיווני
+//    }
+
+//    public bool IsConnected()
+//    {
+//        if (!Nodes.Any()) return false;
+
+//        var visited = new HashSet<long>();
+//        var queue = new Queue<Node>();
+//        var first = Nodes.Values.First();
+//        queue.Enqueue(first);
+//        visited.Add(first.Id);
+
+//        while (queue.Any())
+//        {
+//            var current = queue.Dequeue();
+//            foreach (var edge in current.Edges)
+//            {
+//                if (!visited.Contains(edge.To.Id))
+//                {
+//                    visited.Add(edge.To.Id);
+//                    queue.Enqueue(edge.To);
+//                }
+//            }
+//        }
+
+//        return visited.Count == Nodes.Count;
+//    }
+
+//    public List<HashSet<long>> GetConnectedComponents()
+//    {
+//        var visited = new HashSet<long>();
+//        var components = new List<HashSet<long>>();
+
+//        foreach (var node in Nodes.Values)
+//        {
+//            if (!visited.Contains(node.Id))
+//            {
+//                var component = new HashSet<long>();
+//                var stack = new Stack<Node>();
+//                stack.Push(node);
+
+//                while (stack.Any())
+//                {
+//                    var current = stack.Pop();
+//                    if (!visited.Add(current.Id)) continue;
+//                    component.Add(current.Id);
+
+//                    foreach (var edge in current.Edges)
+//                    {
+//                        if (!visited.Contains(edge.To.Id))
+//                            stack.Push(edge.To);
+//                    }
+//                }
+
+//                components.Add(component);
+//            }
+//        }
+
+//        return components;
+//    }
+
+//    public List<(long from, long to)> GetAllEdges()
+//    {
+//        var edges = new HashSet<(long, long)>();
+
+//        foreach (var node in Nodes.Values)
+//        {
+//            foreach (var edge in node.Edges)
+//            {
+//                var a = node.Id;
+//                var b = edge.To.Id;
+//                if (a < b) edges.Add((a, b));
+//                else edges.Add((b, a));
+//            }
+//        }
+
+//        return edges.ToList();
+//    }
+
+//    public void AddNode(long nodeId, double lat, double lon)
+//    {
+//        if (!Nodes.ContainsKey(nodeId))
+//        {
+//            Nodes[nodeId] = new Node
+//            {
+//                Id = nodeId,
+//                Latitude = lat,
+//                Longitude = lon,
+//                Edges = new List<Edge>()
+//            };
+//        }
+//    }
+//    public Graph FilterNodes(HashSet<long> allowedNodes)
+//    {
+//        var filteredGraph = new Graph();
+
+//        foreach (var nodeId in allowedNodes)
+//        {
+//            if (Nodes.ContainsKey(nodeId))
+//            {
+//                filteredGraph.Nodes[nodeId] = Nodes[nodeId];
+//            }
+//        }
+
+//        foreach (var node in filteredGraph.Nodes.Values)
+//        {
+//            node.Edges = node.Edges.Where(edge => filteredGraph.Nodes.ContainsKey(edge.To.Id)).ToList();
+
+//        }
+
+//        return filteredGraph;
+//    }
+
+//}
 

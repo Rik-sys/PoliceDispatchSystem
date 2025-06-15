@@ -15,6 +15,8 @@ namespace PoliceDispatchSystem
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            DTO.ConfigurationLoader.LoadOnewaySettings(builder.Configuration);
+
             // Add services to the container.
             builder.Services.AddCors(options =>
             {
@@ -52,6 +54,7 @@ namespace PoliceDispatchSystem
             builder.Services.AddDbContext<PoliceDispatchSystemContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+          
 
 
             var app = builder.Build();
