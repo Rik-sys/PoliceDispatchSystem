@@ -558,8 +558,7 @@ namespace PoliceDispatchSystem.Controllers
                     return BadRequest($"האלגוריתם לא הצליח לכלול את כל הצמתים האסטרטגיים. חסרים: {string.Join(", ", missingStrategic)}");
                 }
 
-                const double averageSpeed = 13.89;
-                double maxResponseTimeInSeconds = result.MaxDistance / averageSpeed;
+                double maxDistanceInKilometers = result.MaxDistance / 1000.0;
 
                 var strategicCount = strategicNodeIds.Count;
                 var regularCount = result.CenterNodes.Count - strategicCount;
@@ -574,14 +573,14 @@ namespace PoliceDispatchSystem.Controllers
                         IsStrategic = strategicNodeIds.Contains(nodeId),
                         IsOnRealRoad = graph.IsStrategicNode(nodeId)
                     }).ToList(),
-                    MaxDistance = result.MaxDistance,
-                    MaxResponseTimeInSeconds = maxResponseTimeInSeconds,
+                    MaxDistance = result.MaxDistance, // מטרים
+                    MaxDistanceInKilometers = maxDistanceInKilometers, // קילומטרים
                     StrategicOfficers = strategicCount,
                     RegularOfficers = regularCount,
                     NodesCreatedOnRoads = strategicNodeIds.Count,
                     Message = strategicCount > 0
-                        ? $"פוזרו {request.K} שוטרים - {strategicCount} בצמתים אסטרטגיים על דרכים אמיתיות ו-{regularCount} נוספים. זמן תגובה מקסימלי: {(int)maxResponseTimeInSeconds} שניות."
-                        : $"פוזרו {request.K} שוטרים בהצלחה. זמן תגובה מקסימלי: {(int)maxResponseTimeInSeconds} שניות."
+        ? $"פוזרו {request.K} שוטרים - {strategicCount} בצמתים אסטרטגיים על דרכים אמיתיות ו-{regularCount} נוספים. מרחק מקסימלי: {maxDistanceInKilometers:F2} ק\"מ."
+        : $"פוזרו {request.K} שוטרים בהצלחה. מרחק מקסימלי: {maxDistanceInKilometers:F2} ק\"מ."
                 };
 
                 return Ok(response);
@@ -624,7 +623,7 @@ namespace PoliceDispatchSystem.Controllers
         }
 
         private ActionResult RunDistribution(Graph graph, Dictionary<long, (double lat, double lon)> nodes,
-                                             Dictionary<long, bool> inBounds, int k, int? eventId = null)
+                                      Dictionary<long, bool> inBounds, int k, int? eventId = null)
         {
             if (k <= 0)
                 return BadRequest("מספר השוטרים חייב להיות גדול מאפס");
@@ -634,8 +633,7 @@ namespace PoliceDispatchSystem.Controllers
                 var allowed = inBounds.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToHashSet();
                 var result = _kCenterService.DistributePolice(graph, k, allowed);
 
-                const double speed = 13.89;
-                double timeSec = result.MaxDistance / speed;
+                double maxDistanceInKilometers = result.MaxDistance / 1000.0; // המרה לקילומטרים
 
                 return Ok(new
                 {
@@ -646,9 +644,9 @@ namespace PoliceDispatchSystem.Controllers
                         Latitude = graph.Nodes[id].Latitude,
                         Longitude = graph.Nodes[id].Longitude
                     }),
-                    result.MaxDistance,
-                    MaxResponseTimeInSeconds = timeSec,
-                    Message = $"פוזרו {k} שוטרים בהצלחה. זמן תגובה מקסימלי: {(int)timeSec} שניות."
+                    MaxDistance = result.MaxDistance, // מטרים
+                    MaxDistanceInKilometers = maxDistanceInKilometers, // קילומטרים
+                    Message = $"פוזרו {k} שוטרים בהצלחה. מרחק מקסימלי: {maxDistanceInKilometers:F2} ק\"מ."
                 });
             }
             catch (Exception ex)
