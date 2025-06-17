@@ -32,6 +32,9 @@ namespace PoliceDispatchSystem
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddSingleton<IGraphManagerService, GraphManagerService>();
+            builder.Services.AddScoped<IGraphService, GraphService>();
+
             builder.Services.AddScoped<IGraphService, GraphService>();
             builder.Services.AddScoped<IKCenterService, KCenterService>();
             builder.Services.AddScoped<IEventDAL, EventDAL>();
