@@ -34,6 +34,15 @@ namespace DAL
         {
             return _context.Events.ToList();
         }
+        public List<EventZone> GetAllEventZones()
+        {
+            return _context.EventZones.ToList();
+        }
+        public EventZone? GetEventZoneByEventId(int eventId)
+        {
+            return _context.EventZones.FirstOrDefault(z => z.EventId == eventId);
+        }
+
 
     }
 }

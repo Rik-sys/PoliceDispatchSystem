@@ -533,10 +533,10 @@ namespace BLL
             }
 
             var newGraph = BuildGraph(originalNodes, disconnectedGraph.GetAllEdges().Concat(allAddedEdges).ToList());
-            if (!newGraph.IsConnected() && components.Count > 2)
-            {
-                return RepairGraphIteratively(newGraph, originalNodes, fullNodes, fullEdges, maxSearchDistance);
-            }
+            //if (!newGraph.IsConnected() && components.Count > 2)
+            //{
+            //    return RepairGraphIteratively(newGraph, originalNodes, fullNodes, fullEdges, maxSearchDistance);
+            //}
             return newGraph;
         }
 
@@ -544,6 +544,8 @@ namespace BLL
 
         #region Private Helper Methods
 
+
+        //תיקון איטרטיבי לוגית אין בו צורך בכלל ועדיף את הראשון
         private Graph RepairGraphIteratively(
             Graph partiallyRepairedGraph,
             Dictionary<long, (double lat, double lon)> originalNodes,
@@ -555,6 +557,8 @@ namespace BLL
             if (components.Count <= 1) return partiallyRepairedGraph;
 
             var allAddedEdges = new List<(long from, long to)>();
+
+            //מיון בסדר יורד (מהגדול לקטן) לפי מספר האיברים בכל HashSet
             components.Sort((a, b) => b.Count.CompareTo(a.Count));
 
             var mainComponent = new HashSet<long>(components[0]);

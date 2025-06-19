@@ -143,5 +143,16 @@ namespace BLL
         {
             return _eventDal.GetEvents().Select(ev => _mapper.Map<EventDTO>(ev)).ToList();
         }
+        public List<EventZoneDTO> GetAllEventZones()
+        {
+            var zones = _eventDal.GetAllEventZones();
+            return zones.Select(z => _mapper.Map<EventZoneDTO>(z)).ToList();
+        }
+        public EventZoneDTO? GetEventZoneByEventId(int eventId)
+        {
+            var zone = _eventDal.GetEventZoneByEventId(eventId);
+            return zone != null ? _mapper.Map<EventZoneDTO>(zone) : null;
+        }
+
     }
 }

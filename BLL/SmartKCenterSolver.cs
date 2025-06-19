@@ -560,6 +560,7 @@ namespace BLL
                 maxDistance = Math.Max(maxDistance, minDistanceToCenter);
             }
 
+
             return maxDistance;
         }
 

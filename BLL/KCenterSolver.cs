@@ -83,6 +83,7 @@ namespace BLL
 
                 //הצמתים שיכוסו ע''י המרכז שבחרתי ואפשר להסיר אותם
                 var toRemove = new HashSet<long>();
+
                 foreach (var nodeId in remainingNodes)
                 {
                     //אם המרחק בין הצומת לבין המרכז שנבחר כרגע קטן מהרדיוס אפשר להוסיף אותו לרשימת הצמתים שיוסרו
@@ -102,7 +103,10 @@ namespace BLL
                     }
                 }
                 //הסרה של כל הצמתים שכוסו מרשימת הצמתים שעדיין לא כוסו
-                remainingNodes.ExceptWith(toRemove); } return centers;}
+                remainingNodes.ExceptWith(toRemove); 
+            }
+            return centers;
+        }
 
         //הכנה של מטריצת מרחקים ע''י אלגוריתם דייקסטרה
         private Dictionary<(long, long), double> ComputeAllPairsShortestPaths(Graph graph)

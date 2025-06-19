@@ -2143,6 +2143,31 @@ namespace PoliceDispatchSystem.API
             return Ok(allEvents);
         }
 
+        [HttpGet("{eventId}/zone")]
+        public IActionResult GetZoneForEvent(int eventId)
+        {
+            var zone = _eventService.GetEventZoneByEventId(eventId);
+            if (zone == null)
+                return NotFound($"לא נמצא אזור לאירוע {eventId}");
+
+            return Ok(zone);
+        }
+
+        [HttpGet("allZones")]
+        public IActionResult GetAllEventZones()
+        {
+            try
+            {
+                var allZones = _eventService.GetAllEventZones();
+                return Ok(allZones);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"שגיאה בשליפת האזורים: {ex.Message}");
+            }
+        }
+
+
         /// <summary>
         /// מחשב מרחק משוטר למיקום נתון
         /// </summary>

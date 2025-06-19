@@ -124,8 +124,6 @@
 //    }
 //}
 // CallController.cs - גרסה מתוקנת לחלוטין ללא קריאות לקונטרולרים
-// CallController.cs - גרסה מתוקנת לחלוטין ללא קריאות לקונטרולרים
-// CallController.cs - גרסה מתוקנת לחלוטין ללא קריאות לקונטרולרים
 using BLL;
 using DTO;
 using IBL;

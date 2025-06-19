@@ -23,5 +23,8 @@ namespace IBL
         List<PoliceOfficerDTO> GetAvailableOfficersForEvent(DateOnly date, TimeOnly start, TimeOnly end); // חזרה ל-DTO הקיים
         void DeleteEvent(int eventId);
         public List<EventDTO> GetEvents();
+        List<EventZoneDTO> GetAllEventZones();
+        EventZoneDTO? GetEventZoneByEventId(int eventId);
+
     }
 }

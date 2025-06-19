@@ -9,5 +9,9 @@ namespace IDAL
         Event? GetEventById(int eventId);
 
         List<Event> GetEvents();
+
+        List<EventZone> GetAllEventZones();
+        EventZone? GetEventZoneByEventId(int eventId);
+
     }
 }
