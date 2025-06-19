@@ -1867,18 +1867,18 @@ namespace PoliceDispatchSystem.API
                     .Select(kvp => kvp.Key)
                     .ToHashSet();
 
-                Console.WriteLine($"🔍 מספר צמתים בתחום: {nodesInBounds.Count}");
+                Console.WriteLine($" מספר צמתים בתחום: {nodesInBounds.Count}");
 
                 // יצירת צמתים אסטרטגיים על דרכים אמיתיות
                 List<long> strategicNodeIds = new List<long>();
 
                 if (request.StrategicZones != null && request.StrategicZones.Any())
                 {
-                    Console.WriteLine($"🎯 יוצר {request.StrategicZones.Count} צמתים אסטרטגיים על דרכים:");
+                    Console.WriteLine($" יוצר {request.StrategicZones.Count} צמתים אסטרטגיים על דרכים:");
 
                     foreach (var zone in request.StrategicZones)
                     {
-                        Console.WriteLine($"\n📍 מעבד אזור: ({zone.Latitude}, {zone.Longitude})");
+                        Console.WriteLine($"\n מעבד אזור: ({zone.Latitude}, {zone.Longitude})");
 
                         // שימוש בפיצול Way במקום חיפוש צומת קרוב
                         var newStrategicNodeId = currentGraph.CreateStrategicNodeOnWay(
@@ -1906,7 +1906,7 @@ namespace PoliceDispatchSystem.API
                     }
 
                     strategicNodeIds = strategicNodeIds.Distinct().ToList();
-                    Console.WriteLine($"\n🎯 סה\"כ צמתים אסטרטגיים נוצרו על דרכים: {strategicNodeIds.Count}");
+                    Console.WriteLine($"\n סה\"כ צמתים אסטרטגיים נוצרו על דרכים: {strategicNodeIds.Count}");
                 }
 
                 // עדכון רשימת הצמתים המותרים

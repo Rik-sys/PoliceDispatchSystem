@@ -135,11 +135,11 @@ namespace BLL
             }
         }
 
-        public GraphData GetGraphForEvent(int eventId)
+        public GraphData GetGraphForEvent(int? eventId)
         {
             lock (_eventGraphsLock)
             {
-                return _eventGraphs.TryGetValue(eventId, out var graphData) ? graphData : null;
+                return _eventGraphs.TryGetValue((int)eventId, out var graphData) ? graphData : null;
             }
         }
 

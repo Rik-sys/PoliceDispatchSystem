@@ -26,7 +26,7 @@ namespace BLL
         // Event Graphs Management
         void SaveGraphForEvent(int eventId, Graph graph, Dictionary<long, (double lat, double lon)> nodes,
                               Dictionary<long, bool> nodesInBounds);
-        GraphData GetGraphForEvent(int eventId);
+        GraphData GetGraphForEvent(int? eventId);
         void RemoveGraphForEvent(int eventId);
         Dictionary<int, DateTime> GetAllEventGraphs();
         void CleanupOldGraphs(TimeSpan maxAge);
