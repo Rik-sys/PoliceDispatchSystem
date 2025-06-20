@@ -580,7 +580,7 @@ namespace PoliceDispatchSystem.API
         {
             try
             {
-                // כאן תצטרכי להוסיף פונקציה למחיקת שיוך ב-CallAssignmentService
+                // כאן נצטרך להוסיף פונקציה למחיקת שיוך ב-CallAssignmentService
                 // אבל זמנית נחזיר הודעה
                 return Ok(new
                 {

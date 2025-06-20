@@ -1790,19 +1790,23 @@ namespace PoliceDispatchSystem.API
         private readonly IOfficerAssignmentService _officerAssignmentService;
         private readonly IStrategicZoneBL _strategicZoneBL;
         private readonly IGraphManagerService _graphManager;
+        private readonly IPoliceOfficerService _policeOfficerService;
+
 
         public EventController(
             IEventService eventService,
             IKCenterService kCenterService,
             IOfficerAssignmentService officerAssignmentService,
             IStrategicZoneBL strategicZoneBL,
-            IGraphManagerService graphManager)
+            IGraphManagerService graphManager,
+            IPoliceOfficerService policeOfficerService)
         {
             _eventService = eventService;
             _kCenterService = kCenterService;
             _officerAssignmentService = officerAssignmentService;
             _strategicZoneBL = strategicZoneBL;
             _graphManager = graphManager;
+            _policeOfficerService = policeOfficerService;
         }
 
         [HttpPost("create")]
@@ -1930,7 +1934,7 @@ namespace PoliceDispatchSystem.API
                 var missingStrategic = strategicNodeIds.Where(id => !result.CenterNodes.Contains(id)).ToList();
                 if (missingStrategic.Any())
                 {
-                    Console.WriteLine($"❌ צמתים אסטרטגיים שלא נכללו: {string.Join(", ", missingStrategic)}");
+                    Console.WriteLine($" צמתים אסטרטגיים שלא נכללו: {string.Join(", ", missingStrategic)}");
                     return BadRequest($"האלגוריתם לא הצליח לכלול את כל הצמתים האסטרטגיים. חסרים: {string.Join(", ", missingStrategic)}");
                 }
 

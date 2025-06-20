@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DBEntities.Models;
+using DTO;
 
 namespace IDAL
 {
@@ -13,5 +14,7 @@ namespace IDAL
         List<PoliceOfficer> GetAvailableOfficersWithUsers(DateOnly date, TimeOnly start, TimeOnly end);
         List<PoliceOfficer> GetAllOfficersWithUsers();
         PoliceOfficer GetOfficerWithUserById(int officerId);
+        OfficerStatusDTO GetOfficerStatus(int officerId);
+
     }
 }

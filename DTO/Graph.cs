@@ -86,7 +86,7 @@ namespace DTO
             long newNodeId = _nextVirtualNodeId++;
             AddNode(newNodeId, projectionPoint.lat, projectionPoint.lon);
 
-            // **פיצול הקטע המקורי**
+            // פיצול הקטע המקורי
             return SplitWaySegment(closestSegment, newNodeId, projectionPoint);
         }
 
@@ -100,7 +100,7 @@ namespace DTO
 
             foreach (var segment in WaySegments)
             {
-                // בדיקה שהקטע חוצה את האזור המותר
+                // בדיקה שכל הקטע נמצא בתוך האזור המותר-גם ההתחלה וגם הסוף שלו
                 if (!allowedNodes.Contains(segment.FromNodeId) || !allowedNodes.Contains(segment.ToNodeId))
                     continue;
 

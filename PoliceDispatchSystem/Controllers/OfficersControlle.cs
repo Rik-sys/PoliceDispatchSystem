@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DTO;
 using IBL;
-using System.Collections.Generic;
 
 namespace PoliceDispatchSystem.API
 {
@@ -10,10 +9,11 @@ namespace PoliceDispatchSystem.API
     public class OfficersController : ControllerBase
     {
         private readonly IOfficerAssignmentService _officerAssignmentService;
-
-        public OfficersController(IOfficerAssignmentService officerAssignmentService)
+        private readonly IPoliceOfficerService _officerService;
+        public OfficersController(IOfficerAssignmentService officerAssignmentService, IPoliceOfficerService officerService)
         {
             _officerAssignmentService = officerAssignmentService;
+            _officerService = officerService;
         }
 
         [HttpGet("locations")]
@@ -29,5 +29,19 @@ namespace PoliceDispatchSystem.API
                 return BadRequest($"שגיאה בשליפת מיקומי שוטרים: {ex.Message}");
             }
         }
+        [HttpGet("{officerId}/status")]
+        public ActionResult<OfficerStatusDTO> GetOfficerStatus(int officerId)
+        {
+            try
+            {
+                var status = _officerService.GetOfficerStatus(officerId);
+                return Ok(status);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"שגיאה בשליפת סטטוס שוטר: {ex.Message}");
+            }
+        }
+
     }
 }

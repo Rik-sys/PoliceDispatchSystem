@@ -1,4 +1,5 @@
 ﻿using DBEntities.Models;
+using DTO;
 using IDAL;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,5 +50,19 @@ namespace DAL
                 .Include(p => p.VehicleType)
                 .FirstOrDefault(p => p.PoliceOfficerId == officerId);
         }
+
+        public OfficerStatusDTO GetOfficerStatus(int officerId)
+        {
+            bool isInCall = _context.CallAssignments.Any(c => c.PoliceOfficerId == officerId);
+            if (isInCall)
+                return new OfficerStatusDTO { OfficerId = officerId, Status = "AssignedToCall" };
+
+            bool isInEvent = _context.OfficerAssignments.Any(e => e.PoliceOfficerId == officerId);
+            if (isInEvent)
+                return new OfficerStatusDTO { OfficerId = officerId, Status = "AssignedToEvent" };
+
+            return new OfficerStatusDTO { OfficerId = officerId, Status = "Available" };
+        }
+
     }
 }
