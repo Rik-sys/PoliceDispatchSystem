@@ -1,4 +1,6 @@
 ﻿
+using Utilities;
+
 namespace DAL
 {
     public static class OsmGraphRepairer
@@ -53,7 +55,7 @@ namespace DAL
                 foreach (var b in sampledB)
                 {
                     var coordB = fullNodes[b];
-                    double dist = Haversine(coordA.lat, coordA.lon, coordB.lat, coordB.lon);
+                    double dist = GeoUtils.CalculateDistance(coordA.lat, coordA.lon, coordB.lat, coordB.lon);
                     if (dist < minPair.dist)
                     {
                         minPair = (a, b, dist);
@@ -92,10 +94,9 @@ namespace DAL
                 foreach (var neighbor in graph[current])
                 {
                     // חישוב משקל הקשת באמצעות מרחק
-                    double weight = Haversine(
-                        nodes[current].lat, nodes[current].lon,
+                    double weight = GeoUtils.CalculateDistance(nodes[current].lat, nodes[current].lon,
                         nodes[neighbor].lat, nodes[neighbor].lon);
-
+                     
                     double alt = dist[current] + weight;
                     if (!dist.ContainsKey(neighbor) || alt < dist[neighbor])
                     {
@@ -129,20 +130,6 @@ namespace DAL
                 graph[to].Add(from);
             }
             return graph;
-        }
-
-        private static double Haversine(double lat1, double lon1, double lat2, double lon2)
-        {
-            double R = 6371e3;
-            double phi1 = lat1 * Math.PI / 180;
-            double phi2 = lat2 * Math.PI / 180;
-            double dPhi = (lat2 - lat1) * Math.PI / 180;
-            double dLambda = (lon2 - lon1) * Math.PI / 180;
-            double a = Math.Sin(dPhi / 2) * Math.Sin(dPhi / 2) +
-                       Math.Cos(phi1) * Math.Cos(phi2) *
-                       Math.Sin(dLambda / 2) * Math.Sin(dLambda / 2);
-            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            return R * c;
         }
     }
 }

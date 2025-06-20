@@ -490,8 +490,32 @@ namespace PoliceDispatchSystem.API
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ שגיאה ביצירת קריאה: {ex.Message}");
+                Console.WriteLine($" שגיאה ביצירת קריאה: {ex.Message}");
                 return BadRequest($"שגיאה ביצירת הקריאה: {ex.Message}");
+            }
+        }
+        [HttpGet("all")]
+        public IActionResult GetAllCalls()
+        {
+            try
+            {
+                var calls = _callService.GetAllCalls();
+
+                return Ok(calls.Select(c => new
+                {
+                    CallId = c.CallId,
+                    RequiredOfficers = c.RequiredOfficers,
+                    ContactPhone = c.ContactPhone,
+                    UrgencyLevel = c.UrgencyLevel,
+                    CallTime = c.CallTime,
+                    Status = c.Status,
+                    Latitude = c.Latitude,
+                    Longitude = c.Longitude
+                }));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"שגיאה בשליפת כל הקריאות: {ex.Message}");
             }
         }
 

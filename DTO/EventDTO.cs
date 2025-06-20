@@ -1,7 +1,6 @@
-﻿
+﻿//מייצג את האובייקט של טבלת אירוע במסד
 namespace DTO
 {
-
     public class EventDTO
     {
         public int EventId { get; set; }
@@ -10,7 +9,6 @@ namespace DTO
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public int RequiredOfficers { get; set; }
-
         public string? Description { get; set; }
         public string? Priority { get; set; }
     }

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
+//תפקיד המחלקה
+//מייצגת את הבקשה שמגיעה מצד לקוח כאשר מוקדנית רוצה לשייך שוטר לקריאה
 namespace DTO
 {
     public class AssignOfficerRequestDTO

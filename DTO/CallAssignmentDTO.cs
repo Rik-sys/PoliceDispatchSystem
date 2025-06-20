@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
+//מחלקה שמייצגת את השיוך בפועל למסד נתונים של שיוך שוטר לקריאה
 namespace DTO
 {
     public class CallAssignmentDTO

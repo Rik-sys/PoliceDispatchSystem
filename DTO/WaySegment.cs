@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 //מייצגת קטע דרך בודד (קשת בגרף) שמקורו ב-way של OSM
 namespace DTO
 {

@@ -7,5 +7,7 @@ namespace IBL
         void AddOfficerAssignments(List<OfficerAssignmentDTO> assignments);
         List<OfficerAssignmentDTO> GetAssignmentsByEventId(int eventId);
         List<OfficerAssignmentDTO> GetAssignmentsByOfficerId(int officerId);
+        List<OfficerAssignmentDTO> GetAllAssignments();
+
     }
 }

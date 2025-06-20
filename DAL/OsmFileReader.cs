@@ -3,6 +3,7 @@ using OsmSharp.Streams;
 using OsmSharp;
 using OsmSharp.Tags;
 using DTO;
+using Utilities;
 namespace DAL
 {
     public static class OsmFileReader
@@ -111,15 +112,15 @@ namespace DAL
             }
 
             // הדפסת סטטיסטיקות
-            Console.WriteLine($"📊 נטען גרף עם {graph.Nodes.Count} צמתים ו-{graph.WaySegments.Count} קטעי דרך");
-            Console.WriteLine($"🚦 סטטיסטיקות כיווניות:");
-            Console.WriteLine($"   ↔️  דו־כיווניות: {bidirectionalCount}");
-            Console.WriteLine($"   ➡️  חד־כיווניות (קדימה): {onewayCount}");
-            Console.WriteLine($"   ⬅️  חד־כיווניות (אחורה): {reverseOnewayCount}");
+            Console.WriteLine($" נטען גרף עם {graph.Nodes.Count} צמתים ו-{graph.WaySegments.Count} קטעי דרך");
+            Console.WriteLine($" סטטיסטיקות כיווניות:");
+            Console.WriteLine($"  דו־כיווניות: {bidirectionalCount}");
+            Console.WriteLine($"  חד־כיווניות (קדימה): {onewayCount}");
+            Console.WriteLine($"  חד־כיווניות (אחורה): {reverseOnewayCount}");
 
             if (Config.AllowReverseDirection)
             {
-                Console.WriteLine($"⚙️  מקדם עונש תנועה הפוכה: {Config.ReverseDirectionPenalty:F1}x");
+                Console.WriteLine($"מקדם עונש תנועה הפוכה: {Config.ReverseDirectionPenalty:F1}x");
             }
 
             return graph;
@@ -209,7 +210,7 @@ namespace DAL
         )
 
         {
-            double totalDistance = CalculateDistanceInMeters(
+            double totalDistance = GeoUtils.CalculateDistance(
                 fromCoord.lat, fromCoord.lon,
                 toCoord.lat, toCoord.lon
             );
@@ -256,7 +257,7 @@ namespace DAL
                 }
 
                 // חישוב משקל הקטע הנוכחי
-                double segmentDistance = CalculateDistanceInMeters(
+                double segmentDistance = GeoUtils.CalculateDistance(
                     currentFromCoord.lat, currentFromCoord.lon,
                     currentToCoord.lat, currentToCoord.lon
                 );
@@ -346,23 +347,6 @@ namespace DAL
 
                 return true;
             });
-        }
-
-        private static double CalculateDistanceInMeters(double lat1, double lon1, double lat2, double lon2)
-        {
-            const double R = 6371000;
-            double lat1Rad = lat1 * Math.PI / 180;
-            double lat2Rad = lat2 * Math.PI / 180;
-            double deltaLat = (lat2 - lat1) * Math.PI / 180;
-            double deltaLon = (lon2 - lon1) * Math.PI / 180;
-
-            double a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
-                       Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
-                       Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2);
-
-            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-
-            return R * c;
         }
     }
 

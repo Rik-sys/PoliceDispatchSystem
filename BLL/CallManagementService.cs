@@ -1,5 +1,6 @@
 ﻿using DTO;
 using IBL;
+using Utilities;
 using static DTO.CallResponsesDTO;
 
 namespace BLL
@@ -117,7 +118,7 @@ namespace BLL
             int callId)
         {
             var chosen = availableOfficers
-                .OrderBy(o => GetDistance(o.Latitude, o.Longitude, request.Latitude, request.Longitude))
+                .OrderBy(o => GeoUtils.CalculateDistance(o.Latitude, o.Longitude, request.Latitude, request.Longitude))
                 .Take(request.RequiredOfficers)
                 .ToList();
 
@@ -159,7 +160,7 @@ namespace BLL
 
                 var officer = remainingOfficers
                     .Where(o => !reassigned.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
-                    .OrderBy(o => GetDistance(o.Latitude, o.Longitude, coord.lat, coord.lon))
+                    .OrderBy(o => GeoUtils.CalculateDistance(o.Latitude, o.Longitude, coord.lat, coord.lon))
                     .FirstOrDefault();
 
                 if (officer != null)
@@ -230,7 +231,7 @@ namespace BLL
                             Latitude = officer.Latitude,
                             Longitude = officer.Longitude
                         },
-                        DistanceToCall = GetDistance(
+                        DistanceToCall = GeoUtils.CalculateDistance(
                             officer.Latitude, officer.Longitude,
                             request.Latitude, request.Longitude)
                     });
@@ -251,20 +252,6 @@ namespace BLL
                     Longitude = r.Longitude
                 }
             }).ToList();
-        }
-
-        private double GetDistance(double lat1, double lon1, double lat2, double lon2)
-        {
-            var R = 6371000; // רדיוס כדור הארץ במטרים
-            var dLat = Math.PI / 180 * (lat2 - lat1);
-            var dLon = Math.PI / 180 * (lon2 - lon1);
-
-            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                    Math.Cos(Math.PI / 180 * lat1) * Math.Cos(Math.PI / 180 * lat2) *
-                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
-
-            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            return R * c;
         }
     }
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
+//מייצג את הטבלה סוג כלי רכב להרחבה בהמשך...
 namespace DTO
 {
     internal class VehicleType

@@ -38,5 +38,11 @@ namespace BLL
             var calls = _callDal.GetCallsByEventId(eventId);
             return _mapper.Map<List<CallDTO>>(calls);
         }
+        public List<CallDTO> GetAllCalls()
+        {
+            var calls = _callDal.GetAllCalls();
+            return _mapper.Map<List<CallDTO>>(calls);
+        }
+
     }
 }

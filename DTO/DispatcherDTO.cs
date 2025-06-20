@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿//מייצג את האוביקט של טבלת מוקדנית במסד
 namespace DTO
 {
     public class DispatcherDTO
     {
         public int DispatcherId { get; set; }
-
-        public virtual UserDTO DispatcherNavigation { get; set; } = null!;
     }
 }

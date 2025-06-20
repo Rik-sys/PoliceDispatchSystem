@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿//מחלקה שמייצגת אובייקט בטבלת שיוך שוטרים לאירוע
 namespace DTO
 {
     public class OfficerAssignmentDTO

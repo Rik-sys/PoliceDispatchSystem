@@ -33,6 +33,11 @@ namespace DAL
                     .Where(c => c.EventId == eventId)
                     .ToList();
             }
+            public List<Call> GetAllCalls()
+            {
+                return _context.Calls.ToList();
+            }
+
         }
 
     }

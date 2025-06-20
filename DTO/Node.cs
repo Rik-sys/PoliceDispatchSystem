@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿//מחלקה לייצוג צומת בגרף
 namespace DTO
 {
     public class Node
     {
-
         public long Id { get; set; }
 
         //קו רוחב של מיקום הצומת

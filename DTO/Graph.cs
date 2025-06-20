@@ -1,19 +1,13 @@
-﻿
-//טוב רק לא תומך בקשתות חד כיווניות
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Utilities;
 namespace DTO
 {
+    //מחלקה מרכזית לייצוג גרף
     public class Graph
     {
         //מילון לגרף לוגי
         public Dictionary<long, Node> Nodes { get; set; } = new();
 
         //שמירת מידע על Ways לצורך פיצול
-
         public List<WaySegment> WaySegments { get; set; } = new();
 
         // מונה לצמתים חדשים-מתחיל גבוה כדי שלא יתנגש לי עם צמתים של OSM
@@ -62,8 +56,8 @@ namespace DTO
             });
         }
 
-        
-        /// יוצר צומת אסטרטגי על ה-Way הקרוב ביותר       
+
+        // יוצר צומת אסטרטגי חדש על קטע הדרך הקרוב ביותר למיקום הנתון, ומחזיר את מזהה הצומת החדש
         public long CreateStrategicNodeOnWay(double latitude, double longitude, HashSet<long> allowedNodes)
         {
             Console.WriteLine($" מחפש Way קרוב למיקום ({latitude}, {longitude})");
@@ -73,11 +67,11 @@ namespace DTO
 
             if (closestSegment == null)
             {
-                Console.WriteLine("❌ לא נמצא קטע דרך מתאים");
+                Console.WriteLine("לא נמצא קטע דרך מתאים");
                 return -1;
             }
 
-            Console.WriteLine($"📍 נמצא קטע דרך {closestSegment.WayId} מצומת {closestSegment.FromNodeId} לצומת {closestSegment.ToNodeId}");
+            Console.WriteLine($"נמצא קטע דרך {closestSegment.WayId} מצומת {closestSegment.FromNodeId} לצומת {closestSegment.ToNodeId}");
 
             // חישוב נקודת ההטלה על הקטע
             var projectionPoint = ProjectPointOntoSegment(
@@ -86,7 +80,7 @@ namespace DTO
                 closestSegment.ToCoord.lat, closestSegment.ToCoord.lon
             );
 
-            Console.WriteLine($"📐 נקודת הטלה: ({projectionPoint.lat:F6}, {projectionPoint.lon:F6})");
+            Console.WriteLine($"נקודת הטלה: ({projectionPoint.lat:F6}, {projectionPoint.lon:F6})");
 
             // יצירת צומת חדש
             long newNodeId = _nextVirtualNodeId++;
@@ -127,12 +121,12 @@ namespace DTO
             if (closestSegment != null)
             {
                 double distanceInMeters = minDistance * 111_000; // המרה גסה למטרים
-                Console.WriteLine($"🎯 נמצא קטע קרוב ביותר: מרחק {distanceInMeters:F0} מטר");
+                Console.WriteLine($"נמצא קטע קרוב ביותר: מרחק {distanceInMeters:F0} מטר");
 
                 // בדיקת סבירות המרחק
                 if (distanceInMeters > 500) // יותר מ-500 מטר
                 {
-                    Console.WriteLine($"⚠️  אזהרה: המרחק גדול ({distanceInMeters:F0}m), הצומת עלול להיות רחוק מהדרך");
+                    Console.WriteLine($" אזהרה: המרחק גדול ({distanceInMeters:F0}m), הצומת עלול להיות רחוק מהדרך");
                 }
             }
 
@@ -150,12 +144,13 @@ namespace DTO
             RemoveEdgeBetweenNodes(originalSegment.FromNodeId, originalSegment.ToNodeId);
 
             // 2. חישוב משקלים לקשתות החדשות
-            double distanceToFrom = CalculateDistanceInMeters(
+            
+            double distanceToFrom = GeoUtils.CalculateDistance(
                 splitPoint.lat, splitPoint.lon,
                 originalSegment.FromCoord.lat, originalSegment.FromCoord.lon
             );
 
-            double distanceToEnd = CalculateDistanceInMeters(
+            double distanceToEnd = GeoUtils.CalculateDistance(
                 splitPoint.lat, splitPoint.lon,
                 originalSegment.ToCoord.lat, originalSegment.ToCoord.lon
             );
@@ -164,7 +159,7 @@ namespace DTO
             AddEdge(originalSegment.FromNodeId, newNodeId, distanceToFrom);
             AddEdge(newNodeId, originalSegment.ToNodeId, distanceToEnd);
 
-            Console.WriteLine($"🔗 נוצרו קשתות:");
+            Console.WriteLine($"נוצרו קשתות:");
             Console.WriteLine($"   {originalSegment.FromNodeId} → {newNodeId} ({distanceToFrom:F0}m)");
             Console.WriteLine($"   {newNodeId} → {originalSegment.ToNodeId} ({distanceToEnd:F0}m)");
 
@@ -262,28 +257,6 @@ namespace DTO
         }
 
         /// <summary>
-        /// חישוב מרחק גיאוגרפי במטרים (בקירוב)
-        /// </summary>
-        private double CalculateDistanceInMeters(double lat1, double lon1, double lat2, double lon2)
-        {
-            // שימוש בנוסחת Haversine לדיוק טוב יותר
-            const double R = 6371000; // רדיוס כדור הארץ במטרים
-
-            double lat1Rad = lat1 * Math.PI / 180;
-            double lat2Rad = lat2 * Math.PI / 180;
-            double deltaLat = (lat2 - lat1) * Math.PI / 180;
-            double deltaLon = (lon2 - lon1) * Math.PI / 180;
-
-            double a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
-                       Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
-                       Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2);
-
-            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-
-            return R * c;
-        }
-
-        /// <summary>
         /// בדיקה האם צומת הוא צומת אסטרטגי
         /// </summary>
         public bool IsStrategicNode(long nodeId)
@@ -291,7 +264,7 @@ namespace DTO
             return nodeId >= 100_000_000_000L;
         }
 
-        // שאר הפונקציות הקיימות נשארות כמו שהן...
+        
         public bool IsConnected()
         {
             if (!Nodes.Any()) return false;
@@ -396,165 +369,15 @@ namespace DTO
 
                 if (Config.VerboseOnewayLogging)
                 {
-                    Console.WriteLine($"🚧 חד־כיווני: {from}→{to} ({weight}), הפוך עם עונש: {to}→{from} ({penalizedWeight})");
+                    Console.WriteLine($" חד־כיווני: {from}→{to} ({weight}), הפוך עם עונש: {to}→{from} ({penalizedWeight})");
                 }
             }
             else if (Config.VerboseOnewayLogging)
             {
-                Console.WriteLine($"🚫 חד־כיווני חסום: {from}→{to} ({weight})");
+                Console.WriteLine($" חד־כיווני חסום: {from}→{to} ({weight})");
             }
         }
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//public class Graph
-//{
-//    public Dictionary<long, Node> Nodes { get; set; } = new();
-
-//    public void AddEdge(long from, long to, double weight = 1)
-//    {
-//        if (!Nodes.ContainsKey(from) || !Nodes.ContainsKey(to))
-//            return;
-
-//        Nodes[from].Edges.Add(new Edge { To = Nodes[to], Weight = weight });
-//        Nodes[to].Edges.Add(new Edge { To = Nodes[from], Weight = weight }); // דו-כיווני
-//    }
-
-//    public bool IsConnected()
-//    {
-//        if (!Nodes.Any()) return false;
-
-//        var visited = new HashSet<long>();
-//        var queue = new Queue<Node>();
-//        var first = Nodes.Values.First();
-//        queue.Enqueue(first);
-//        visited.Add(first.Id);
-
-//        while (queue.Any())
-//        {
-//            var current = queue.Dequeue();
-//            foreach (var edge in current.Edges)
-//            {
-//                if (!visited.Contains(edge.To.Id))
-//                {
-//                    visited.Add(edge.To.Id);
-//                    queue.Enqueue(edge.To);
-//                }
-//            }
-//        }
-
-//        return visited.Count == Nodes.Count;
-//    }
-
-//    public List<HashSet<long>> GetConnectedComponents()
-//    {
-//        var visited = new HashSet<long>();
-//        var components = new List<HashSet<long>>();
-
-//        foreach (var node in Nodes.Values)
-//        {
-//            if (!visited.Contains(node.Id))
-//            {
-//                var component = new HashSet<long>();
-//                var stack = new Stack<Node>();
-//                stack.Push(node);
-
-//                while (stack.Any())
-//                {
-//                    var current = stack.Pop();
-//                    if (!visited.Add(current.Id)) continue;
-//                    component.Add(current.Id);
-
-//                    foreach (var edge in current.Edges)
-//                    {
-//                        if (!visited.Contains(edge.To.Id))
-//                            stack.Push(edge.To);
-//                    }
-//                }
-
-//                components.Add(component);
-//            }
-//        }
-
-//        return components;
-//    }
-
-//    public List<(long from, long to)> GetAllEdges()
-//    {
-//        var edges = new HashSet<(long, long)>();
-
-//        foreach (var node in Nodes.Values)
-//        {
-//            foreach (var edge in node.Edges)
-//            {
-//                var a = node.Id;
-//                var b = edge.To.Id;
-//                if (a < b) edges.Add((a, b));
-//                else edges.Add((b, a));
-//            }
-//        }
-
-//        return edges.ToList();
-//    }
-
-//    public void AddNode(long nodeId, double lat, double lon)
-//    {
-//        if (!Nodes.ContainsKey(nodeId))
-//        {
-//            Nodes[nodeId] = new Node
-//            {
-//                Id = nodeId,
-//                Latitude = lat,
-//                Longitude = lon,
-//                Edges = new List<Edge>()
-//            };
-//        }
-//    }
-//    public Graph FilterNodes(HashSet<long> allowedNodes)
-//    {
-//        var filteredGraph = new Graph();
-
-//        foreach (var nodeId in allowedNodes)
-//        {
-//            if (Nodes.ContainsKey(nodeId))
-//            {
-//                filteredGraph.Nodes[nodeId] = Nodes[nodeId];
-//            }
-//        }
-
-//        foreach (var node in filteredGraph.Nodes.Values)
-//        {
-//            node.Edges = node.Edges.Where(edge => filteredGraph.Nodes.ContainsKey(edge.To.Id)).ToList();
-
-//        }
-
-//        return filteredGraph;
-//    }
-
-//}
 

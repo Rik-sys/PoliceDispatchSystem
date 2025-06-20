@@ -7,5 +7,7 @@ namespace IDAL
         void AddAssignments(List<OfficerAssignment> list);
         List<OfficerAssignment> GetAssignmentsByEventId(int eventId);
         List<OfficerAssignment> GetAssignmentsByOfficerId(int officerId);
+        List<OfficerAssignment> GetAllAssignments();
+
     }
 }

@@ -24,6 +24,7 @@
     <ProjectReference Include="..\DBEntities\DBEntities.csproj" />
     <ProjectReference Include="..\DTO\DTO.csproj" />
     <ProjectReference Include="..\IDAL\IDAL.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
 
 </Project>

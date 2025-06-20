@@ -2189,26 +2189,7 @@ namespace PoliceDispatchSystem.API
             return 0; // מחזיר 0 - כל השוטרים שווים במרחק
         }
 
-        /// <summary>
-        /// חישוב מרחק Haversine בין שתי נקודות גיאוגרפיות
-        /// </summary>
-        private double CalculateHaversineDistance(double lat1, double lon1, double lat2, double lon2)
-        {
-            const double R = 6371000; // רדיוס כדור הארץ במטרים
-
-            double lat1Rad = lat1 * Math.PI / 180;
-            double lat2Rad = lat2 * Math.PI / 180;
-            double deltaLat = (lat2 - lat1) * Math.PI / 180;
-            double deltaLon = (lon2 - lon1) * Math.PI / 180;
-
-            double a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
-                       Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
-                       Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2);
-
-            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-
-            return R * c;
-        }
+        
     }
 
     // מחלקות Request

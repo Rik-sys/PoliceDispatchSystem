@@ -40,5 +40,10 @@ namespace DAL
                 .Where(oa => oa.PoliceOfficerId == officerId)
                 .ToList();
         }
+        public List<OfficerAssignment> GetAllAssignments()
+        {
+            return _context.OfficerAssignments.ToList();
+        }
+
     }
 }

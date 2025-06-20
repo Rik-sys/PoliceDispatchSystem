@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿//מחלקה לייצוג של קשת בגרף
 namespace DTO
 {
     public class Edge

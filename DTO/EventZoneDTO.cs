@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿//מייצג אובייקט של אזור אירוע בטבלה במסד
 namespace DTO
 {
     public class EventZoneDTO
@@ -27,7 +22,5 @@ namespace DTO
         public double Latitude4 { get; set; }
 
         public double Longitude4 { get; set; }
-
-        public virtual EventDTO? Event { get; set; }
     }
 }

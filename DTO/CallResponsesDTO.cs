@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DTO
+﻿namespace DTO
 {
+    //מחלקות של תגובת השרת ליצירת קריאות
     public class CallResponsesDTO
     {
+
+        // מייצגת את הפלט המרכזי של תהליך שיוך קריאה – כולל נתוני הקריאה, שוטרים ששובצו, והודעות
         public class CallCreationResponse
         {
             public int CallId { get; set; }
@@ -20,6 +17,7 @@ namespace DTO
             public List<ReassignedOfficerResponse> ReassignedOfficersList { get; set; } = new();
         }
 
+        // מכילה מידע כללי על הקריאה שנוצרה – מזהה, מיקום, מספר נדרש ומספר שובץ בפועל
         public class CallInfoResponse
         {
             public int Id { get; set; }
@@ -28,6 +26,8 @@ namespace DTO
             public int ActualAssigned { get; set; }
         }
 
+
+        // מייצגת שוטר ששובץ לקריאה – כולל מזהה, מיקום נוכחי ומרחק מהקריאה
         public class AssignedOfficerResponse
         {
             public int OfficerId { get; set; }

@@ -22,5 +22,10 @@ namespace BLL
         {
             return _dal.GetStrategicZonesForEvent(eventId);
         }
+        public List<StrategicZoneDTO> GetAllStrategicZones()
+        {
+            return _dal.GetAllStrategicZones();
+        }
+
     }
 }

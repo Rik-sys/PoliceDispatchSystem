@@ -1,6 +1,7 @@
 ﻿using DAL;
 using DTO;
 using IBL;
+using Utilities;
 
 namespace BLL
 {
@@ -239,7 +240,7 @@ namespace BLL
             {
                 if (graph.Nodes.ContainsKey(edge.from) && graph.Nodes.ContainsKey(edge.to))
                 {
-                    double weight = CalculateDistance(
+                    double weight = GeoUtils.CalculateDistance(
                         nodes[edge.from].lat, nodes[edge.from].lon,
                         nodes[edge.to].lat, nodes[edge.to].lon);
 
@@ -371,27 +372,13 @@ namespace BLL
             {
                 if (graph.Nodes.ContainsKey(from) && graph.Nodes.ContainsKey(to))
                 {
-                    double weight = CalculateDistance(graph.Nodes[from].Latitude, graph.Nodes[from].Longitude,
+                    double weight = GeoUtils.CalculateDistance(graph.Nodes[from].Latitude, graph.Nodes[from].Longitude,
                                           graph.Nodes[to].Latitude, graph.Nodes[to].Longitude);
                     graph.AddEdge(from, to, weight);
                 }
             }
 
             return graph;
-        }
-
-        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
-        {
-            double R = 6371e3;
-            double phi1 = lat1 * Math.PI / 180;
-            double phi2 = lat2 * Math.PI / 180;
-            double dPhi = (lat2 - lat1) * Math.PI / 180;
-            double dLambda = (lon2 - lon1) * Math.PI / 180;
-            double a = Math.Sin(dPhi / 2) * Math.Sin(dPhi / 2) +
-                       Math.Cos(phi1) * Math.Cos(phi2) *
-                       Math.Sin(dLambda / 2) * Math.Sin(dLambda / 2);
-            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            return R * c;
         }
 
         #endregion

@@ -11,5 +11,7 @@ namespace IBL
     {
         int CreateCall(CallDTO callDto);
         List<CallDTO> GetCallsByEvent(int eventId);
+        List<CallDTO> GetAllCalls();
+
     }
 }

@@ -40,5 +40,18 @@ namespace DAL
                     StrategyLevel = z.StrategyLevel
                 }).ToList();
         }
+        public List<StrategicZoneDTO> GetAllStrategicZones()
+        {
+            return _context.StrategicZones
+                .Select(z => new StrategicZoneDTO
+                {
+                    StrategicZoneId = z.StrategicZoneId,
+                    EventId = z.EventId,
+                    Latitude = z.Latitude,
+                    Longitude = z.Longitude,
+                    StrategyLevel = z.StrategyLevel
+                }).ToList();
+        }
+
     }
 }

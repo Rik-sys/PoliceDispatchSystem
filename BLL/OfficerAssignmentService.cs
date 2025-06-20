@@ -48,6 +48,12 @@ namespace BLL
             var entities = _officerAssignmentDal.GetAssignmentsByOfficerId(officerId);
             return _mapper.Map<List<OfficerAssignmentDTO>>(entities);
         }
+        public List<OfficerAssignmentDTO> GetAllAssignments()
+        {
+            var entities = _officerAssignmentDal.GetAllAssignments();
+            return _mapper.Map<List<OfficerAssignmentDTO>>(entities);
+        }
+
     }
 }
 
