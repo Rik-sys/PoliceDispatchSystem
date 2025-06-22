@@ -1771,13 +1771,474 @@
 //}
 
 // EventController.cs - גרסה מתוקנת לחלוטין ללא קריאות לקונטרולרים
+//using Microsoft.AspNetCore.Mvc;
+//using DTO;
+//using IBL;
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using BLL;
+
+//namespace PoliceDispatchSystem.API
+//{
+//    [Route("api/[controller]")]
+//    [ApiController]
+//    public class EventController : ControllerBase
+//    {
+//        private readonly IEventService _eventService;
+//        private readonly IKCenterService _kCenterService;
+//        private readonly IOfficerAssignmentService _officerAssignmentService;
+//        private readonly IStrategicZoneBL _strategicZoneBL;
+//        private readonly IGraphManagerService _graphManager;
+//        private readonly IPoliceOfficerService _policeOfficerService;
+
+
+//        public EventController(
+//            IEventService eventService,
+//            IKCenterService kCenterService,
+//            IOfficerAssignmentService officerAssignmentService,
+//            IStrategicZoneBL strategicZoneBL,
+//            IGraphManagerService graphManager,
+//            IPoliceOfficerService policeOfficerService)
+//        {
+//            _eventService = eventService;
+//            _kCenterService = kCenterService;
+//            _officerAssignmentService = officerAssignmentService;
+//            _strategicZoneBL = strategicZoneBL;
+//            _graphManager = graphManager;
+//            _policeOfficerService = policeOfficerService;
+//        }
+
+//        [HttpPost("create")]
+//        public IActionResult CreateEvent([FromBody] CreateEventRequest request)
+//        {
+//            if (!_graphManager.HasCurrentGraph())
+//                return BadRequest("אין גרף טעון במערכת.");
+
+//            if (request.SelectedArea == null || request.SelectedArea.Count < 4)
+//                return BadRequest("נדרשות לפחות 4 נקודות לתחום האירוע.");
+
+//            if (request.StrategicZones != null && request.StrategicZones.Count > request.RequiredOfficers)
+//                return BadRequest($"לא ניתן להציב {request.StrategicZones.Count} אזורים אסטרטגיים עם {request.RequiredOfficers} שוטרים בלבד.");
+
+//            try
+//            {
+//                // יצירת DTO לאירוע ואזור
+//                var eventDto = new EventDTO
+//                {
+//                    EventName = request.Name,
+//                    Description = request.Description,
+//                    Priority = request.Priority,
+//                    EventDate = DateOnly.FromDateTime(DateTime.Parse(request.StartDate)),
+//                    StartTime = TimeOnly.Parse(request.StartTime),
+//                    EndTime = TimeOnly.Parse(request.EndTime),
+//                    RequiredOfficers = request.RequiredOfficers
+//                };
+
+//                var zoneDto = new EventZoneDTO
+//                {
+//                    Latitude1 = request.SelectedArea[0][0],
+//                    Longitude1 = request.SelectedArea[0][1],
+//                    Latitude2 = request.SelectedArea[1][0],
+//                    Longitude2 = request.SelectedArea[1][1],
+//                    Latitude3 = request.SelectedArea[2][0],
+//                    Longitude3 = request.SelectedArea[2][1],
+//                    Latitude4 = request.SelectedArea[3][0],
+//                    Longitude4 = request.SelectedArea[3][1]
+//                };
+
+//                // שמירה במסד נתונים
+//                int eventId = _eventService.CreateEventWithZone(eventDto, zoneDto);
+
+//                // שמירת הגרף דרך GraphManager במקום קריאה ישירה לקונטרולר
+//                var currentGraph = _graphManager.GetCurrentGraph();
+//                var currentNodes = _graphManager.GetCurrentNodes();
+//                var currentBounds = _graphManager.GetNodesInOriginalBounds();
+
+//                _graphManager.SaveGraphForEvent(eventId, currentGraph, currentNodes, currentBounds);
+
+//                // שמירת אזורים אסטרטגיים
+//                if (request.StrategicZones != null && request.StrategicZones.Any())
+//                {
+//                    foreach (var zone in request.StrategicZones)
+//                        zone.EventId = eventId;
+//                    _strategicZoneBL.AddStrategicZones(request.StrategicZones);
+//                }
+
+//                // קבלת צמתים בתחום
+//                var nodesInBounds = currentBounds
+//                    .Where(kvp => kvp.Value == true)
+//                    .Select(kvp => kvp.Key)
+//                    .ToHashSet();
+
+//                Console.WriteLine($" מספר צמתים בתחום: {nodesInBounds.Count}");
+
+//                // יצירת צמתים אסטרטגיים על דרכים אמיתיות
+//                List<long> strategicNodeIds = new List<long>();
+
+//                if (request.StrategicZones != null && request.StrategicZones.Any())
+//                {
+//                    Console.WriteLine($" יוצר {request.StrategicZones.Count} צמתים אסטרטגיים על דרכים:");
+
+//                    foreach (var zone in request.StrategicZones)
+//                    {
+//                        Console.WriteLine($"\n מעבד אזור: ({zone.Latitude}, {zone.Longitude})");
+
+//                        // שימוש בפיצול Way במקום חיפוש צומת קרוב
+//                        var newStrategicNodeId = currentGraph.CreateStrategicNodeOnWay(
+//                            zone.Latitude,
+//                            zone.Longitude,
+//                            nodesInBounds
+//                        );
+
+//                        if (newStrategicNodeId != -1)
+//                        {
+//                            strategicNodeIds.Add(newStrategicNodeId);
+
+//                            // עדכון המילונים
+//                            var actualCoord = currentGraph.Nodes[newStrategicNodeId];
+//                            currentNodes[newStrategicNodeId] = (actualCoord.Latitude, actualCoord.Longitude);
+//                            currentBounds[newStrategicNodeId] = true;
+
+//                            Console.WriteLine($"✅ נוצר צומת אסטרטגי {newStrategicNodeId} על דרך אמיתית");
+//                        }
+//                        else
+//                        {
+//                            Console.WriteLine($"❌ כשל ביצירת צומת - לא נמצא קטע דרך מתאים במיקום ({zone.Latitude}, {zone.Longitude})");
+//                            return BadRequest($"לא ניתן ליצור צומת אסטרטגי במיקום ({zone.Latitude}, {zone.Longitude}) - לא נמצא קטע דרך קרוב");
+//                        }
+//                    }
+
+//                    strategicNodeIds = strategicNodeIds.Distinct().ToList();
+//                    Console.WriteLine($"\n סה\"כ צמתים אסטרטגיים נוצרו על דרכים: {strategicNodeIds.Count}");
+//                }
+
+//                // עדכון רשימת הצמתים המותרים
+//                var allowedNodesForDistribution = new HashSet<long>(nodesInBounds);
+//                foreach (var strategicId in strategicNodeIds)
+//                {
+//                    allowedNodesForDistribution.Add(strategicId);
+//                }
+
+//                Console.WriteLine($"📊 סה\"כ צמתים זמינים לפיזור: {allowedNodesForDistribution.Count}");
+
+//                // פיזור K-Center
+//                var result = _kCenterService.DistributePolice(
+//                    currentGraph,
+//                    request.RequiredOfficers,
+//                    allowedNodesForDistribution,
+//                    strategicNodeIds
+//                );
+
+//                // בדיקה שכל הצמתים האסטרטגיים נכללו
+//                var missingStrategic = strategicNodeIds.Where(id => !result.CenterNodes.Contains(id)).ToList();
+//                if (missingStrategic.Any())
+//                {
+//                    Console.WriteLine($" צמתים אסטרטגיים שלא נכללו: {string.Join(", ", missingStrategic)}");
+//                    return BadRequest($"האלגוריתם לא הצליח לכלול את כל הצמתים האסטרטגיים. חסרים: {string.Join(", ", missingStrategic)}");
+//                }
+
+//                // שליפת שוטרים זמינים ושיוך
+//                var selectedNodeIds = result.CenterNodes;
+//                var availableOfficers = _eventService.GetAvailableOfficersForEvent(
+//                    eventDto.EventDate,
+//                    eventDto.StartTime,
+//                    eventDto.EndTime
+//                );
+
+//                var assignmentDtos = new List<OfficerAssignmentDTO>();
+//                foreach (var nodeId in selectedNodeIds)
+//                {
+//                    if (!currentNodes.TryGetValue(nodeId, out var coord))
+//                        continue;
+
+//                    var availableOfficer = availableOfficers
+//                        .Where(o => !assignmentDtos.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
+//                        .OrderBy(o => CalculateDistanceFromOfficer(o, coord.lat, coord.lon))
+//                        .FirstOrDefault();
+
+//                    if (availableOfficer != null)
+//                    {
+//                        assignmentDtos.Add(new OfficerAssignmentDTO
+//                        {
+//                            PoliceOfficerId = availableOfficer.PoliceOfficerId,
+//                            EventId = eventId,
+//                            Latitude = coord.lat,
+//                            Longitude = coord.lon
+//                        });
+//                    }
+//                }
+
+//                _officerAssignmentService.AddOfficerAssignments(assignmentDtos);
+
+//                var strategicCount = strategicNodeIds.Count;
+//                var regularCount = selectedNodeIds.Count - strategicCount;
+
+//                return Ok(new
+//                {
+//                    EventId = eventId,
+//                    OfficerCount = assignmentDtos.Count,
+//                    StrategicOfficers = strategicCount,
+//                    RegularOfficers = regularCount,
+//                    NodesCreatedOnRealRoads = strategicNodeIds.Count,
+//                    Message = strategicCount > 0
+//                        ? $"אירוע נוצר בהצלחה. נוצרו {strategicNodeIds.Count} צמתים אסטרטגיים על דרכים אמיתיות ושובצו {strategicCount} שוטרים באזורים אסטרטגיים ו-{regularCount} שוטרים נוספים"
+//                        : "אירוע נוצר בהצלחה ושובצו שוטרים",
+//                    DebugInfo = new
+//                    {
+//                        OriginalStrategicZones = request.StrategicZones?.Count ?? 0,
+//                        FoundStrategicNodes = strategicNodeIds.Count,
+//                        TotalNodesInBounds = nodesInBounds.Count,
+//                        TotalWaySegments = currentGraph.WaySegments.Count,
+//                        SelectedNodes = selectedNodeIds.Count
+//                    }
+//                });
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine($"❌ שגיאה ביצירת אירוע: {ex.Message}");
+//                return BadRequest($"שגיאה ביצירת האירוע: {ex.Message}");
+//            }
+//        }
+
+//        [HttpPost("create-with-positions")]
+//        public IActionResult CreateEventWithPositions([FromBody] CreateEventWithPositionsRequest request)
+//        {
+//            if (request.PreCalculatedPositions == null || !request.PreCalculatedPositions.Any())
+//                return BadRequest("לא נמצא פיזור מוכן של שוטרים");
+
+//            if (request.SelectedArea == null || request.SelectedArea.Count < 4)
+//                return BadRequest("נדרשות לפחות 4 נקודות לתחום האירוע");
+
+//            try
+//            {
+//                // יצירת DTO לאירוע
+//                var eventDto = new EventDTO
+//                {
+//                    EventName = request.Name,
+//                    Description = request.Description,
+//                    Priority = request.Priority,
+//                    EventDate = DateOnly.FromDateTime(DateTime.Parse(request.StartDate)),
+//                    StartTime = TimeOnly.Parse(request.StartTime),
+//                    EndTime = TimeOnly.Parse(request.EndTime),
+//                    RequiredOfficers = request.RequiredOfficers
+//                };
+
+//                var zoneDto = new EventZoneDTO
+//                {
+//                    Latitude1 = request.SelectedArea[0][0],
+//                    Longitude1 = request.SelectedArea[0][1],
+//                    Latitude2 = request.SelectedArea[1][0],
+//                    Longitude2 = request.SelectedArea[1][1],
+//                    Latitude3 = request.SelectedArea[2][0],
+//                    Longitude3 = request.SelectedArea[2][1],
+//                    Latitude4 = request.SelectedArea[3][0],
+//                    Longitude4 = request.SelectedArea[3][1]
+//                };
+
+//                // שמירה במסד נתונים
+//                int eventId = _eventService.CreateEventWithZone(eventDto, zoneDto);
+
+//                // שמירת גרף עבור האירוע
+//                if (_graphManager.HasCurrentGraph())
+//                {
+//                    var currentGraph = _graphManager.GetCurrentGraph();
+//                    var currentNodes = _graphManager.GetCurrentNodes();
+//                    var currentBounds = _graphManager.GetNodesInOriginalBounds();
+
+//                    _graphManager.SaveGraphForEvent(eventId, currentGraph, currentNodes, currentBounds);
+//                }
+
+//                // שמירת אזורים אסטרטגיים
+//                if (request.StrategicZones != null && request.StrategicZones.Any())
+//                {
+//                    foreach (var zone in request.StrategicZones)
+//                        zone.EventId = eventId;
+//                    _strategicZoneBL.AddStrategicZones(request.StrategicZones);
+//                }
+
+//                // שליפת שוטרים זמינים
+//                var availableOfficers = _eventService.GetAvailableOfficersForEvent(
+//                    eventDto.EventDate,
+//                    eventDto.StartTime,
+//                    eventDto.EndTime
+//                );
+
+//                // שימוש בפיזור המוכן מראש
+//                var assignmentDtos = new List<OfficerAssignmentDTO>();
+//                int strategicCount = 0;
+
+//                Console.WriteLine($"💾 משתמש בפיזור מוכן עם {request.PreCalculatedPositions.Count} מיקומים");
+
+//                foreach (var position in request.PreCalculatedPositions)
+//                {
+//                    // מציאת שוטר זמין
+//                    var availableOfficer = availableOfficers
+//                        .Where(o => !assignmentDtos.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
+//                        .OrderBy(o => CalculateDistanceFromOfficer(o, position.Latitude, position.Longitude))
+//                        .FirstOrDefault();
+
+//                    if (availableOfficer != null)
+//                    {
+//                        assignmentDtos.Add(new OfficerAssignmentDTO
+//                        {
+//                            PoliceOfficerId = availableOfficer.PoliceOfficerId,
+//                            EventId = eventId,
+//                            Latitude = position.Latitude,
+//                            Longitude = position.Longitude
+//                        });
+
+//                        if (position.IsStrategic)
+//                        {
+//                            strategicCount++;
+//                            Console.WriteLine($"🎯 שוטר אסטרטגי הוצב במיקום ({position.Latitude}, {position.Longitude})");
+//                        }
+//                        else
+//                        {
+//                            Console.WriteLine($"👮 שוטר רגיל הוצב במיקום ({position.Latitude}, {position.Longitude})");
+//                        }
+//                    }
+//                }
+
+//                // שמירת השיוכים
+//                _officerAssignmentService.AddOfficerAssignments(assignmentDtos);
+
+//                var regularCount = assignmentDtos.Count - strategicCount;
+
+//                Console.WriteLine($"✅ נוצר אירוע {eventId} עם {assignmentDtos.Count} שוטרים ({strategicCount} אסטרטגיים, {regularCount} רגילים)");
+
+//                return Ok(new
+//                {
+//                    EventId = eventId,
+//                    OfficerCount = assignmentDtos.Count,
+//                    StrategicOfficers = strategicCount,
+//                    RegularOfficers = regularCount,
+//                    Message = strategicCount > 0
+//                        ? $"אירוע נוצר בהצלחה. שובצו {strategicCount} שוטרים באזורים אסטרטגיים ו-{regularCount} שוטרים נוספים"
+//                        : "אירוע נוצר בהצלחה ושובצו שוטרים"
+//                });
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine($"❌ שגיאה ביצירת אירוע: {ex.Message}");
+//                return BadRequest($"שגיאה ביצירת האירוע: {ex.Message}");
+//            }
+//        }
+
+//        [HttpDelete("{eventId}")]
+//        public IActionResult DeleteEvent(int eventId)
+//        {
+//            try
+//            {
+//                _eventService.DeleteEvent(eventId);
+//                _graphManager.RemoveGraphForEvent(eventId);
+//                return Ok(new { Message = "האירוע נמחק בהצלחה" });
+//            }
+//            catch (Exception ex)
+//            {
+//                return BadRequest($"שגיאה במחיקת האירוע: {ex.Message}");
+//            }
+//        }
+
+//        [HttpGet("allEvents")]
+//        public IActionResult GetAllEvents()
+//        {
+//            var allEvents = _eventService.GetEvents();
+//            return Ok(allEvents);
+//        }
+
+//        [HttpGet("{eventId}/zone")]
+//        public IActionResult GetZoneForEvent(int eventId)
+//        {
+//            var zone = _eventService.GetEventZoneByEventId(eventId);
+//            if (zone == null)
+//                return NotFound($"לא נמצא אזור לאירוע {eventId}");
+
+//            return Ok(zone);
+//        }
+
+//        [HttpGet("allZones")]
+//        public IActionResult GetAllEventZones()
+//        {
+//            try
+//            {
+//                var allZones = _eventService.GetAllEventZones();
+//                return Ok(allZones);
+//            }
+//            catch (Exception ex)
+//            {
+//                return BadRequest($"שגיאה בשליפת האזורים: {ex.Message}");
+//            }
+//        }
+
+
+//        /// <summary>
+//        /// מחשב מרחק משוטר למיקום נתון
+//        /// </summary>
+//        private double CalculateDistanceFromOfficer(PoliceOfficerDTO officer, double lat, double lon)
+//        {
+//            // כאן תוכל להוסיף חישוב מרחק אמיתי אם יש לך מיקום של השוטר
+//            // לעת עתה מחזיר 0 כדי שהקוד יעבוד
+//            // ניתן להוסיף מיקום השוטר ל-DTO ולחשב מרחק Haversine
+
+//            // דוגמה לחישוב אם יש מיקום שוטר:
+//            // if (officer.CurrentLatitude.HasValue && officer.CurrentLongitude.HasValue)
+//            // {
+//            //     return CalculateHaversineDistance(
+//            //         officer.CurrentLatitude.Value, officer.CurrentLongitude.Value,
+//            //         lat, lon
+//            //     );
+//            // }
+
+//            return 0; // מחזיר 0 - כל השוטרים שווים במרחק
+//        }
+
+
+//    }
+
+//    // מחלקות Request
+//    public class CreateEventRequest
+//    {
+//        public string Name { get; set; } = "";
+//        public string Description { get; set; } = "";
+//        public string Priority { get; set; } = "";
+//        public string StartDate { get; set; } = "";
+//        public string EndDate { get; set; } = "";
+//        public string StartTime { get; set; } = "";
+//        public string EndTime { get; set; } = "";
+//        public int RequiredOfficers { get; set; }
+//        public List<List<double>> SelectedArea { get; set; } = new();
+//        public List<StrategicZoneDTO> StrategicZones { get; set; } = new();
+//    }
+
+//    public class CreateEventWithPositionsRequest
+//    {
+//        public string Name { get; set; } = "";
+//        public string Description { get; set; } = "";
+//        public string Priority { get; set; } = "";
+//        public string StartDate { get; set; } = "";
+//        public string EndDate { get; set; } = "";
+//        public string StartTime { get; set; } = "";
+//        public string EndTime { get; set; } = "";
+//        public int RequiredOfficers { get; set; }
+//        public List<List<double>> SelectedArea { get; set; } = new();
+//        public List<StrategicZoneDTO> StrategicZones { get; set; } = new();
+//        public List<PreCalculatedPosition> PreCalculatedPositions { get; set; } = new();
+//    }
+
+//    public class PreCalculatedPosition
+//    {
+//        public double Latitude { get; set; }
+//        public double Longitude { get; set; }
+//        public bool IsStrategic { get; set; }
+//        public long NodeId { get; set; }
+//    }
+//}
 using Microsoft.AspNetCore.Mvc;
 using DTO;
 using IBL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using BLL;
+using Microsoft.Extensions.Logging;
+using static DTO.EventRequestsDTO;
 
 namespace PoliceDispatchSystem.API
 {
@@ -1785,378 +2246,255 @@ namespace PoliceDispatchSystem.API
     [ApiController]
     public class EventController : ControllerBase
     {
+        private readonly IEventManagementService _eventManagementService;
         private readonly IEventService _eventService;
-        private readonly IKCenterService _kCenterService;
-        private readonly IOfficerAssignmentService _officerAssignmentService;
-        private readonly IStrategicZoneBL _strategicZoneBL;
-        private readonly IGraphManagerService _graphManager;
-        private readonly IPoliceOfficerService _policeOfficerService;
-
+        private readonly ILogger<EventController> _logger;
 
         public EventController(
+            IEventManagementService eventManagementService,
             IEventService eventService,
-            IKCenterService kCenterService,
-            IOfficerAssignmentService officerAssignmentService,
-            IStrategicZoneBL strategicZoneBL,
-            IGraphManagerService graphManager,
-            IPoliceOfficerService policeOfficerService)
+            ILogger<EventController> logger)
         {
+            _eventManagementService = eventManagementService;
             _eventService = eventService;
-            _kCenterService = kCenterService;
-            _officerAssignmentService = officerAssignmentService;
-            _strategicZoneBL = strategicZoneBL;
-            _graphManager = graphManager;
-            _policeOfficerService = policeOfficerService;
+            _logger = logger;
         }
 
+        /// <summary>
+        /// יוצר אירוע חדש עם פיזור אוטומטי של שוטרים
+        /// </summary>
         [HttpPost("create")]
-        public IActionResult CreateEvent([FromBody] CreateEventRequest request)
+        public async Task<IActionResult> CreateEvent([FromBody] CreateEventRequestDTO request)
         {
-            if (!_graphManager.HasCurrentGraph())
-                return BadRequest("אין גרף טעון במערכת.");
-
-            if (request.SelectedArea == null || request.SelectedArea.Count < 4)
-                return BadRequest("נדרשות לפחות 4 נקודות לתחום האירוע.");
-
-            if (request.StrategicZones != null && request.StrategicZones.Count > request.RequiredOfficers)
-                return BadRequest($"לא ניתן להציב {request.StrategicZones.Count} אזורים אסטרטגיים עם {request.RequiredOfficers} שוטרים בלבד.");
-
             try
             {
-                // יצירת DTO לאירוע ואזור
-                var eventDto = new EventDTO
+                _logger.LogInformation($"Creating event: {request.Name}");
+
+                var result = await _eventManagementService.CreateEventWithAutoDistribution(request);
+
+                if (!result.Success)
                 {
-                    EventName = request.Name,
-                    Description = request.Description,
-                    Priority = request.Priority,
-                    EventDate = DateOnly.FromDateTime(DateTime.Parse(request.StartDate)),
-                    StartTime = TimeOnly.Parse(request.StartTime),
-                    EndTime = TimeOnly.Parse(request.EndTime),
-                    RequiredOfficers = request.RequiredOfficers
-                };
-
-                var zoneDto = new EventZoneDTO
-                {
-                    Latitude1 = request.SelectedArea[0][0],
-                    Longitude1 = request.SelectedArea[0][1],
-                    Latitude2 = request.SelectedArea[1][0],
-                    Longitude2 = request.SelectedArea[1][1],
-                    Latitude3 = request.SelectedArea[2][0],
-                    Longitude3 = request.SelectedArea[2][1],
-                    Latitude4 = request.SelectedArea[3][0],
-                    Longitude4 = request.SelectedArea[3][1]
-                };
-
-                // שמירה במסד נתונים
-                int eventId = _eventService.CreateEventWithZone(eventDto, zoneDto);
-
-                // שמירת הגרף דרך GraphManager במקום קריאה ישירה לקונטרולר
-                var currentGraph = _graphManager.GetCurrentGraph();
-                var currentNodes = _graphManager.GetCurrentNodes();
-                var currentBounds = _graphManager.GetNodesInOriginalBounds();
-
-                _graphManager.SaveGraphForEvent(eventId, currentGraph, currentNodes, currentBounds);
-
-                // שמירת אזורים אסטרטגיים
-                if (request.StrategicZones != null && request.StrategicZones.Any())
-                {
-                    foreach (var zone in request.StrategicZones)
-                        zone.EventId = eventId;
-                    _strategicZoneBL.AddStrategicZones(request.StrategicZones);
-                }
-
-                // קבלת צמתים בתחום
-                var nodesInBounds = currentBounds
-                    .Where(kvp => kvp.Value == true)
-                    .Select(kvp => kvp.Key)
-                    .ToHashSet();
-
-                Console.WriteLine($" מספר צמתים בתחום: {nodesInBounds.Count}");
-
-                // יצירת צמתים אסטרטגיים על דרכים אמיתיות
-                List<long> strategicNodeIds = new List<long>();
-
-                if (request.StrategicZones != null && request.StrategicZones.Any())
-                {
-                    Console.WriteLine($" יוצר {request.StrategicZones.Count} צמתים אסטרטגיים על דרכים:");
-
-                    foreach (var zone in request.StrategicZones)
+                    _logger.LogWarning($"Event creation failed: {string.Join(", ", result.Errors)}");
+                    return BadRequest(new
                     {
-                        Console.WriteLine($"\n מעבד אזור: ({zone.Latitude}, {zone.Longitude})");
-
-                        // שימוש בפיצול Way במקום חיפוש צומת קרוב
-                        var newStrategicNodeId = currentGraph.CreateStrategicNodeOnWay(
-                            zone.Latitude,
-                            zone.Longitude,
-                            nodesInBounds
-                        );
-
-                        if (newStrategicNodeId != -1)
-                        {
-                            strategicNodeIds.Add(newStrategicNodeId);
-
-                            // עדכון המילונים
-                            var actualCoord = currentGraph.Nodes[newStrategicNodeId];
-                            currentNodes[newStrategicNodeId] = (actualCoord.Latitude, actualCoord.Longitude);
-                            currentBounds[newStrategicNodeId] = true;
-
-                            Console.WriteLine($"✅ נוצר צומת אסטרטגי {newStrategicNodeId} על דרך אמיתית");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"❌ כשל ביצירת צומת - לא נמצא קטע דרך מתאים במיקום ({zone.Latitude}, {zone.Longitude})");
-                            return BadRequest($"לא ניתן ליצור צומת אסטרטגי במיקום ({zone.Latitude}, {zone.Longitude}) - לא נמצא קטע דרך קרוב");
-                        }
-                    }
-
-                    strategicNodeIds = strategicNodeIds.Distinct().ToList();
-                    Console.WriteLine($"\n סה\"כ צמתים אסטרטגיים נוצרו על דרכים: {strategicNodeIds.Count}");
+                        Errors = result.Errors,
+                        Message = "יצירת האירוע נכשלה"
+                    });
                 }
 
-                // עדכון רשימת הצמתים המותרים
-                var allowedNodesForDistribution = new HashSet<long>(nodesInBounds);
-                foreach (var strategicId in strategicNodeIds)
-                {
-                    allowedNodesForDistribution.Add(strategicId);
-                }
-
-                Console.WriteLine($"📊 סה\"כ צמתים זמינים לפיזור: {allowedNodesForDistribution.Count}");
-
-                // פיזור K-Center
-                var result = _kCenterService.DistributePolice(
-                    currentGraph,
-                    request.RequiredOfficers,
-                    allowedNodesForDistribution,
-                    strategicNodeIds
-                );
-
-                // בדיקה שכל הצמתים האסטרטגיים נכללו
-                var missingStrategic = strategicNodeIds.Where(id => !result.CenterNodes.Contains(id)).ToList();
-                if (missingStrategic.Any())
-                {
-                    Console.WriteLine($" צמתים אסטרטגיים שלא נכללו: {string.Join(", ", missingStrategic)}");
-                    return BadRequest($"האלגוריתם לא הצליח לכלול את כל הצמתים האסטרטגיים. חסרים: {string.Join(", ", missingStrategic)}");
-                }
-
-                // שליפת שוטרים זמינים ושיוך
-                var selectedNodeIds = result.CenterNodes;
-                var availableOfficers = _eventService.GetAvailableOfficersForEvent(
-                    eventDto.EventDate,
-                    eventDto.StartTime,
-                    eventDto.EndTime
-                );
-
-                var assignmentDtos = new List<OfficerAssignmentDTO>();
-                foreach (var nodeId in selectedNodeIds)
-                {
-                    if (!currentNodes.TryGetValue(nodeId, out var coord))
-                        continue;
-
-                    var availableOfficer = availableOfficers
-                        .Where(o => !assignmentDtos.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
-                        .OrderBy(o => CalculateDistanceFromOfficer(o, coord.lat, coord.lon))
-                        .FirstOrDefault();
-
-                    if (availableOfficer != null)
-                    {
-                        assignmentDtos.Add(new OfficerAssignmentDTO
-                        {
-                            PoliceOfficerId = availableOfficer.PoliceOfficerId,
-                            EventId = eventId,
-                            Latitude = coord.lat,
-                            Longitude = coord.lon
-                        });
-                    }
-                }
-
-                _officerAssignmentService.AddOfficerAssignments(assignmentDtos);
-
-                var strategicCount = strategicNodeIds.Count;
-                var regularCount = selectedNodeIds.Count - strategicCount;
+                _logger.LogInformation($"Event {result.EventId} created successfully");
 
                 return Ok(new
                 {
-                    EventId = eventId,
-                    OfficerCount = assignmentDtos.Count,
-                    StrategicOfficers = strategicCount,
-                    RegularOfficers = regularCount,
-                    NodesCreatedOnRealRoads = strategicNodeIds.Count,
-                    Message = strategicCount > 0
-                        ? $"אירוע נוצר בהצלחה. נוצרו {strategicNodeIds.Count} צמתים אסטרטגיים על דרכים אמיתיות ושובצו {strategicCount} שוטרים באזורים אסטרטגיים ו-{regularCount} שוטרים נוספים"
-                        : "אירוע נוצר בהצלחה ושובצו שוטרים",
-                    DebugInfo = new
-                    {
-                        OriginalStrategicZones = request.StrategicZones?.Count ?? 0,
-                        FoundStrategicNodes = strategicNodeIds.Count,
-                        TotalNodesInBounds = nodesInBounds.Count,
-                        TotalWaySegments = currentGraph.WaySegments.Count,
-                        SelectedNodes = selectedNodeIds.Count
-                    }
+                    EventId = result.EventId,
+                    OfficerCount = result.OfficerCount,
+                    StrategicOfficers = result.StrategicOfficers,
+                    RegularOfficers = result.RegularOfficers,
+                    NodesCreatedOnRealRoads = result.NodesCreatedOnRealRoads,
+                    Message = result.Message,
+                    DebugInfo = result.DebugInfo
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ שגיאה ביצירת אירוע: {ex.Message}");
-                return BadRequest($"שגיאה ביצירת האירוע: {ex.Message}");
+                _logger.LogError(ex, "Error in CreateEvent endpoint");
+                return StatusCode(500, new { Message = "שגיאה פנימית בשרת" });
             }
         }
 
+        /// <summary>
+        /// יוצר אירוע עם מיקומים מחושבים מראש
+        /// </summary>
         [HttpPost("create-with-positions")]
-        public IActionResult CreateEventWithPositions([FromBody] CreateEventWithPositionsRequest request)
+        public async Task<IActionResult> CreateEventWithPositions([FromBody] CreateEventWithPositionsRequestDTO request)
         {
-            if (request.PreCalculatedPositions == null || !request.PreCalculatedPositions.Any())
-                return BadRequest("לא נמצא פיזור מוכן של שוטרים");
-
-            if (request.SelectedArea == null || request.SelectedArea.Count < 4)
-                return BadRequest("נדרשות לפחות 4 נקודות לתחום האירוע");
-
             try
             {
-                // יצירת DTO לאירוע
-                var eventDto = new EventDTO
+                _logger.LogInformation($"Creating event with pre-calculated positions: {request.Name}");
+
+                var result = await _eventManagementService.CreateEventWithPreCalculatedPositions(request);
+
+                if (!result.Success)
                 {
-                    EventName = request.Name,
-                    Description = request.Description,
-                    Priority = request.Priority,
-                    EventDate = DateOnly.FromDateTime(DateTime.Parse(request.StartDate)),
-                    StartTime = TimeOnly.Parse(request.StartTime),
-                    EndTime = TimeOnly.Parse(request.EndTime),
-                    RequiredOfficers = request.RequiredOfficers
-                };
-
-                var zoneDto = new EventZoneDTO
-                {
-                    Latitude1 = request.SelectedArea[0][0],
-                    Longitude1 = request.SelectedArea[0][1],
-                    Latitude2 = request.SelectedArea[1][0],
-                    Longitude2 = request.SelectedArea[1][1],
-                    Latitude3 = request.SelectedArea[2][0],
-                    Longitude3 = request.SelectedArea[2][1],
-                    Latitude4 = request.SelectedArea[3][0],
-                    Longitude4 = request.SelectedArea[3][1]
-                };
-
-                // שמירה במסד נתונים
-                int eventId = _eventService.CreateEventWithZone(eventDto, zoneDto);
-
-                // שמירת גרף עבור האירוע
-                if (_graphManager.HasCurrentGraph())
-                {
-                    var currentGraph = _graphManager.GetCurrentGraph();
-                    var currentNodes = _graphManager.GetCurrentNodes();
-                    var currentBounds = _graphManager.GetNodesInOriginalBounds();
-
-                    _graphManager.SaveGraphForEvent(eventId, currentGraph, currentNodes, currentBounds);
-                }
-
-                // שמירת אזורים אסטרטגיים
-                if (request.StrategicZones != null && request.StrategicZones.Any())
-                {
-                    foreach (var zone in request.StrategicZones)
-                        zone.EventId = eventId;
-                    _strategicZoneBL.AddStrategicZones(request.StrategicZones);
-                }
-
-                // שליפת שוטרים זמינים
-                var availableOfficers = _eventService.GetAvailableOfficersForEvent(
-                    eventDto.EventDate,
-                    eventDto.StartTime,
-                    eventDto.EndTime
-                );
-
-                // שימוש בפיזור המוכן מראש
-                var assignmentDtos = new List<OfficerAssignmentDTO>();
-                int strategicCount = 0;
-
-                Console.WriteLine($"💾 משתמש בפיזור מוכן עם {request.PreCalculatedPositions.Count} מיקומים");
-
-                foreach (var position in request.PreCalculatedPositions)
-                {
-                    // מציאת שוטר זמין
-                    var availableOfficer = availableOfficers
-                        .Where(o => !assignmentDtos.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
-                        .OrderBy(o => CalculateDistanceFromOfficer(o, position.Latitude, position.Longitude))
-                        .FirstOrDefault();
-
-                    if (availableOfficer != null)
+                    _logger.LogWarning($"Event creation with positions failed: {string.Join(", ", result.Errors)}");
+                    return BadRequest(new
                     {
-                        assignmentDtos.Add(new OfficerAssignmentDTO
-                        {
-                            PoliceOfficerId = availableOfficer.PoliceOfficerId,
-                            EventId = eventId,
-                            Latitude = position.Latitude,
-                            Longitude = position.Longitude
-                        });
-
-                        if (position.IsStrategic)
-                        {
-                            strategicCount++;
-                            Console.WriteLine($"🎯 שוטר אסטרטגי הוצב במיקום ({position.Latitude}, {position.Longitude})");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"👮 שוטר רגיל הוצב במיקום ({position.Latitude}, {position.Longitude})");
-                        }
-                    }
+                        Errors = result.Errors,
+                        Message = "יצירת האירוע נכשלה"
+                    });
                 }
 
-                // שמירת השיוכים
-                _officerAssignmentService.AddOfficerAssignments(assignmentDtos);
-
-                var regularCount = assignmentDtos.Count - strategicCount;
-
-                Console.WriteLine($"✅ נוצר אירוע {eventId} עם {assignmentDtos.Count} שוטרים ({strategicCount} אסטרטגיים, {regularCount} רגילים)");
+                _logger.LogInformation($"Event {result.EventId} created successfully with pre-calculated positions");
 
                 return Ok(new
                 {
-                    EventId = eventId,
-                    OfficerCount = assignmentDtos.Count,
-                    StrategicOfficers = strategicCount,
-                    RegularOfficers = regularCount,
-                    Message = strategicCount > 0
-                        ? $"אירוע נוצר בהצלחה. שובצו {strategicCount} שוטרים באזורים אסטרטגיים ו-{regularCount} שוטרים נוספים"
-                        : "אירוע נוצר בהצלחה ושובצו שוטרים"
+                    EventId = result.EventId,
+                    OfficerCount = result.OfficerCount,
+                    StrategicOfficers = result.StrategicOfficers,
+                    RegularOfficers = result.RegularOfficers,
+                    Message = result.Message
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ שגיאה ביצירת אירוע: {ex.Message}");
-                return BadRequest($"שגיאה ביצירת האירוע: {ex.Message}");
+                _logger.LogError(ex, "Error in CreateEventWithPositions endpoint");
+                return StatusCode(500, new { Message = "שגיאה פנימית בשרת" });
             }
         }
 
+        /// <summary>
+        /// מוחק אירוע ומנקה את כל הקשרים הקשורים
+        /// </summary>
         [HttpDelete("{eventId}")]
-        public IActionResult DeleteEvent(int eventId)
+        public async Task<IActionResult> DeleteEvent(int eventId)
         {
             try
             {
-                _eventService.DeleteEvent(eventId);
-                _graphManager.RemoveGraphForEvent(eventId);
+                _logger.LogInformation($"Deleting event {eventId}");
+
+                var success = await _eventManagementService.DeleteEventComplete(eventId);
+
+                if (!success)
+                {
+                    _logger.LogWarning($"Failed to delete event {eventId}");
+                    return BadRequest(new { Message = "שגיאה במחיקת האירוע" });
+                }
+
+                _logger.LogInformation($"Event {eventId} deleted successfully");
                 return Ok(new { Message = "האירוע נמחק בהצלחה" });
             }
             catch (Exception ex)
             {
-                return BadRequest($"שגיאה במחיקת האירוע: {ex.Message}");
+                _logger.LogError(ex, $"Error deleting event {eventId}");
+                return StatusCode(500, new { Message = "שגיאה פנימית בשרת" });
             }
         }
 
+        /// <summary>
+        /// מחזיר את כל האירועים
+        /// </summary>
         [HttpGet("allEvents")]
         public IActionResult GetAllEvents()
         {
-            var allEvents = _eventService.GetEvents();
-            return Ok(allEvents);
+            try
+            {
+                var allEvents = _eventService.GetEvents();
+                return Ok(allEvents);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all events");
+                return StatusCode(500, new { Message = "שגיאה בשליפת האירועים" });
+            }
         }
 
+        /// <summary>
+        /// מחזיר את כל האירועים עם פרטים מלאים
+        /// </summary>
+        [HttpGet("allEventsWithDetails")]
+        public IActionResult GetAllEventsWithDetails()
+        {
+            try
+            {
+                var eventsWithDetails = _eventManagementService.GetAllEventsWithDetails();
+                return Ok(eventsWithDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all events with details");
+                return StatusCode(500, new { Message = "שגיאה בשליפת האירועים" });
+            }
+        }
+
+        /// <summary>
+        /// מחזיר אירוע עם כל הפרטים הקשורים
+        /// </summary>
+        [HttpGet("{eventId}/details")]
+        public IActionResult GetEventWithDetails(int eventId)
+        {
+            try
+            {
+                var eventWithDetails = _eventManagementService.GetEventWithDetails(eventId);
+                if (eventWithDetails?.Event == null)
+                {
+                    return NotFound(new { Message = $"לא נמצא אירוע עם מזהה {eventId}" });
+                }
+
+                return Ok(eventWithDetails);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting event {eventId} with details");
+                return StatusCode(500, new { Message = "שגיאה בשליפת פרטי האירוע" });
+            }
+        }
+        // הוסיפי endpoint לבדיקה מהירה
+        [HttpGet("debug/test-officers")]
+        public IActionResult TestOfficersAvailability()
+        {
+            try
+            {
+                var testDate = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
+                var startTime = TimeOnly.Parse("10:00");
+                var endTime = TimeOnly.Parse("18:00");
+
+                _logger.LogInformation($"🔍 Testing officer availability for {testDate} {startTime}-{endTime}");
+
+                // בדיקה ישירה של מספר שוטרים במסד
+                // צריך גישה ל-DAL - אבל בינתיים נבדוק דרך השירות
+                var availableOfficers = _eventService.GetAvailableOfficersForEvent(testDate, startTime, endTime);
+
+                return Ok(new
+                {
+                    TestDate = testDate.ToString(),
+                    StartTime = startTime.ToString(),
+                    EndTime = endTime.ToString(),
+                    AvailableOfficersCount = availableOfficers.Count,
+                    Officers = availableOfficers.Take(5).Select(o => new
+                    {
+                        o.PoliceOfficerId,
+                        Username = o.User?.Username ?? "No Username",
+                        o.VehicleTypeId
+                    }).ToList(),
+                    Message = availableOfficers.Count == 0 ? "❌ No officers found!" : $"✅ Found {availableOfficers.Count} officers"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in test officers endpoint");
+                return StatusCode(500, new
+                {
+                    Error = ex.Message,
+                    StackTrace = ex.StackTrace?.Split('\n').Take(5).ToArray()
+                });
+            }
+        }
+        /// <summary>
+        /// מחזיר את האזור של אירוע
+        /// </summary>
         [HttpGet("{eventId}/zone")]
         public IActionResult GetZoneForEvent(int eventId)
         {
-            var zone = _eventService.GetEventZoneByEventId(eventId);
-            if (zone == null)
-                return NotFound($"לא נמצא אזור לאירוע {eventId}");
+            try
+            {
+                var zone = _eventService.GetEventZoneByEventId(eventId);
+                if (zone == null)
+                {
+                    return NotFound(new { Message = $"לא נמצא אזור לאירוע {eventId}" });
+                }
 
-            return Ok(zone);
+                return Ok(zone);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting zone for event {eventId}");
+                return StatusCode(500, new { Message = "שגיאה בשליפת אזור האירוע" });
+            }
         }
 
+        /// <summary>
+        /// מחזיר את כל האזורים של כל האירועים
+        /// </summary>
         [HttpGet("allZones")]
         public IActionResult GetAllEventZones()
         {
@@ -2167,70 +2505,41 @@ namespace PoliceDispatchSystem.API
             }
             catch (Exception ex)
             {
-                return BadRequest($"שגיאה בשליפת האזורים: {ex.Message}");
+                _logger.LogError(ex, "Error getting all event zones");
+                return StatusCode(500, new { Message = "שגיאה בשליפת האזורים" });
             }
         }
 
-
         /// <summary>
-        /// מחשב מרחק משוטר למיקום נתון
+        /// בודק אם שוטר זמין לאירוע
         /// </summary>
-        private double CalculateDistanceFromOfficer(PoliceOfficerDTO officer, double lat, double lon)
+        [HttpGet("officer/{officerId}/availability")]
+        public IActionResult CheckOfficerAvailability(int officerId, [FromQuery] string date, [FromQuery] string startTime, [FromQuery] string endTime)
         {
-            // כאן תוכל להוסיף חישוב מרחק אמיתי אם יש לך מיקום של השוטר
-            // לעת עתה מחזיר 0 כדי שהקוד יעבוד
-            // ניתן להוסיף מיקום השוטר ל-DTO ולחשב מרחק Haversine
+            try
+            {
+                if (!DateOnly.TryParse(date, out var eventDate) ||
+                    !TimeOnly.TryParse(startTime, out var start) ||
+                    !TimeOnly.TryParse(endTime, out var end))
+                {
+                    return BadRequest(new { Message = "פורמט תאריך או שעה לא תקין" });
+                }
 
-            // דוגמה לחישוב אם יש מיקום שוטר:
-            // if (officer.CurrentLatitude.HasValue && officer.CurrentLongitude.HasValue)
-            // {
-            //     return CalculateHaversineDistance(
-            //         officer.CurrentLatitude.Value, officer.CurrentLongitude.Value,
-            //         lat, lon
-            //     );
-            // }
-
-            return 0; // מחזיר 0 - כל השוטרים שווים במרחק
+                var isAvailable = _eventManagementService.IsOfficerAvailableForEvent(officerId, eventDate, start, end);
+                return Ok(new
+                {
+                    OfficerId = officerId,
+                    IsAvailable = isAvailable,
+                    Date = date,
+                    StartTime = startTime,
+                    EndTime = endTime
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking officer {officerId} availability");
+                return StatusCode(500, new { Message = "שגיאה בבדיקת זמינות השוטר" });
+            }
         }
-
-        
-    }
-
-    // מחלקות Request
-    public class CreateEventRequest
-    {
-        public string Name { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string Priority { get; set; } = "";
-        public string StartDate { get; set; } = "";
-        public string EndDate { get; set; } = "";
-        public string StartTime { get; set; } = "";
-        public string EndTime { get; set; } = "";
-        public int RequiredOfficers { get; set; }
-        public List<List<double>> SelectedArea { get; set; } = new();
-        public List<StrategicZoneDTO> StrategicZones { get; set; } = new();
-    }
-
-    public class CreateEventWithPositionsRequest
-    {
-        public string Name { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string Priority { get; set; } = "";
-        public string StartDate { get; set; } = "";
-        public string EndDate { get; set; } = "";
-        public string StartTime { get; set; } = "";
-        public string EndTime { get; set; } = "";
-        public int RequiredOfficers { get; set; }
-        public List<List<double>> SelectedArea { get; set; } = new();
-        public List<StrategicZoneDTO> StrategicZones { get; set; } = new();
-        public List<PreCalculatedPosition> PreCalculatedPositions { get; set; } = new();
-    }
-
-    public class PreCalculatedPosition
-    {
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
-        public bool IsStrategic { get; set; }
-        public long NodeId { get; set; }
     }
 }

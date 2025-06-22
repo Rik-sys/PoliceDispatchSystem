@@ -112,10 +112,29 @@ namespace BLL
             return busyOfficers;
         }
 
+        //private List<CallAssignmentDTO> SelectClosestOfficers(
+        //    List<OfficerAssignmentDTO> availableOfficers,
+        //    CallDTO request,
+        //    int callId)
+        //{
+        //    var chosen = availableOfficers
+        //        .OrderBy(o => GeoUtils.CalculateDistance(o.Latitude, o.Longitude, request.Latitude, request.Longitude))
+        //        .Take(request.RequiredOfficers)
+        //        .ToList();
+
+        //    var callAssignments = chosen.Select(o => new CallAssignmentDTO
+        //    {
+        //        PoliceOfficerId = o.PoliceOfficerId,
+        //        CallId = callId
+        //    }).ToList();
+
+        //    _callAssignmentService.AssignOfficersToCall(callAssignments);
+        //    return callAssignments;
+        //}
         private List<CallAssignmentDTO> SelectClosestOfficers(
-            List<OfficerAssignmentDTO> availableOfficers,
-            CallDTO request,
-            int callId)
+    List<OfficerAssignmentDTO> availableOfficers,
+    CallDTO request,
+    int callId)
         {
             var chosen = availableOfficers
                 .OrderBy(o => GeoUtils.CalculateDistance(o.Latitude, o.Longitude, request.Latitude, request.Longitude))
@@ -125,17 +144,81 @@ namespace BLL
             var callAssignments = chosen.Select(o => new CallAssignmentDTO
             {
                 PoliceOfficerId = o.PoliceOfficerId,
-                CallId = callId
+                CallId = callId,
+                AssignmentTime = DateTime.UtcNow
             }).ToList();
 
+            // ✅ שמירת השיוך לקריאה
             _callAssignmentService.AssignOfficersToCall(callAssignments);
+
+            // ✅ עדכון מיקום השוטרים למיקום הקריאה
+            var officerLocationUpdates = chosen.Select(o => new OfficerAssignmentDTO
+            {
+                PoliceOfficerId = o.PoliceOfficerId,
+                EventId = o.EventId,
+                Latitude = request.Latitude,  // מיקום הקריאה
+                Longitude = request.Longitude  // מיקום הקריאה
+            }).ToList();
+
+            // עדכון המיקומים במסד
+            _officerAssignmentService.UpdateOfficerAssignments(officerLocationUpdates);
+
             return callAssignments;
         }
+        //private List<OfficerAssignmentDTO> RedistributeRemainingOfficers(
+        //    List<OfficerAssignmentDTO> remainingOfficers,
+        //    GraphData graphData,
+        //    int eventId)
+        //{
+        //    if (!remainingOfficers.Any())
+        //        return new List<OfficerAssignmentDTO>();
 
+        //    var graph = graphData.Graph;
+        //    var nodesInBounds = graphData.NodesInOriginalBounds
+        //        .Where(kvp => kvp.Value)
+        //        .Select(kvp => kvp.Key)
+        //        .ToHashSet();
+
+        //    // הרצת K-Center
+        //    var result = _kCenterService.DistributePolice(graph, remainingOfficers.Count, nodesInBounds);
+
+        //    // שיוך השוטרים למיקומים החדשים
+        //    var nodeToCoord = graphData.Nodes;
+        //    var reassigned = new List<OfficerAssignmentDTO>();
+
+        //    foreach (var nodeId in result.CenterNodes)
+        //    {
+        //        if (!nodeToCoord.TryGetValue(nodeId, out var coord))
+        //            continue;
+
+        //        var officer = remainingOfficers
+        //            .Where(o => !reassigned.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
+        //            .OrderBy(o => GeoUtils.CalculateDistance(o.Latitude, o.Longitude, coord.lat, coord.lon))
+        //            .FirstOrDefault();
+
+        //        if (officer != null)
+        //        {
+        //            reassigned.Add(new OfficerAssignmentDTO
+        //            {
+        //                PoliceOfficerId = officer.PoliceOfficerId,
+        //                EventId = eventId,
+        //                Latitude = coord.lat,
+        //                Longitude = coord.lon
+        //            });
+        //        }
+        //    }
+
+        //    if (reassigned.Any())
+        //    {
+        //        _officerAssignmentService.AddOfficerAssignments(reassigned);
+        //    }
+
+        //    return reassigned;
+        //}
         private List<OfficerAssignmentDTO> RedistributeRemainingOfficers(
-            List<OfficerAssignmentDTO> remainingOfficers,
-            GraphData graphData,
-            int eventId)
+    List<OfficerAssignmentDTO> remainingOfficers,
+    GraphData graphData,
+    int eventId)
         {
             if (!remainingOfficers.Any())
                 return new List<OfficerAssignmentDTO>();
@@ -146,26 +229,20 @@ namespace BLL
                 .Select(kvp => kvp.Key)
                 .ToHashSet();
 
-            // הרצת K-Center
+            // הרצת K-Center עם מספר השוטרים הנותרים
             var result = _kCenterService.DistributePolice(graph, remainingOfficers.Count, nodesInBounds);
 
-            // שיוך השוטרים למיקומים החדשים
+            // ✅ עדכון המיקומים הקיימים במקום יצירת חדשים
             var nodeToCoord = graphData.Nodes;
-            var reassigned = new List<OfficerAssignmentDTO>();
+            var updatedAssignments = new List<OfficerAssignmentDTO>();
 
-            foreach (var nodeId in result.CenterNodes)
+            for (int i = 0; i < Math.Min(result.CenterNodes.Count, remainingOfficers.Count); i++)
             {
-                if (!nodeToCoord.TryGetValue(nodeId, out var coord))
-                    continue;
-
-                var officer = remainingOfficers
-                    .Where(o => !reassigned.Any(a => a.PoliceOfficerId == o.PoliceOfficerId))
-                    .OrderBy(o => GeoUtils.CalculateDistance(o.Latitude, o.Longitude, coord.lat, coord.lon))
-                    .FirstOrDefault();
-
-                if (officer != null)
+                var nodeId = result.CenterNodes[i];
+                if (nodeToCoord.TryGetValue(nodeId, out var coord))
                 {
-                    reassigned.Add(new OfficerAssignmentDTO
+                    var officer = remainingOfficers[i];
+                    updatedAssignments.Add(new OfficerAssignmentDTO
                     {
                         PoliceOfficerId = officer.PoliceOfficerId,
                         EventId = eventId,
@@ -175,12 +252,13 @@ namespace BLL
                 }
             }
 
-            if (reassigned.Any())
+            if (updatedAssignments.Any())
             {
-                _officerAssignmentService.AddOfficerAssignments(reassigned);
+                // ✅ עדכון המיקומים הקיימים במקום הוספה
+                _officerAssignmentService.UpdateOfficerAssignments(updatedAssignments);
             }
 
-            return reassigned;
+            return updatedAssignments;
         }
 
         private CallCreationResponse CreateCallResponse(

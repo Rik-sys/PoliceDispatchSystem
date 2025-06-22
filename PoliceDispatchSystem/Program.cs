@@ -1,7 +1,6 @@
 
 using BLL;
 using DAL;
-using DAL.DAL;
 using DBEntities.Models;
 using IBL;
 using IDAL;
@@ -52,6 +51,8 @@ namespace PoliceDispatchSystem
             builder.Services.AddScoped<IStrategicZoneBL, StrategicZoneBL>();
             builder.Services.AddScoped<IStrategicZoneDAL, StrategicZoneDAL>();
             builder.Services.AddScoped<IPoliceOfficerService, PoliceOfficerService>();
+            builder.Services.AddScoped<IEventManagementService, EventManagementService>();
+
 
 
             builder.Services.AddScoped<ICallManagementService, CallManagementService>();

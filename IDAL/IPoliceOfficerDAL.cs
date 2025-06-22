@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
+//ממשק לניהול מידע של שוטרים
 using DBEntities.Models;
 using DTO;
 
@@ -15,6 +11,6 @@ namespace IDAL
         List<PoliceOfficer> GetAllOfficersWithUsers();
         PoliceOfficer GetOfficerWithUserById(int officerId);
         OfficerStatusDTO GetOfficerStatus(int officerId);
-
+        PoliceOfficer? GetOfficerById(int officerId);
     }
 }

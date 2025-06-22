@@ -1,48 +1,38 @@
 ﻿using DBEntities.Models;
 using IDAL;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAL
 {
     public class UserDAL : IUserDAL
     {
-        public void AddUser(User user)
+        private readonly PoliceDispatchSystemContext _context;
+
+        public UserDAL(PoliceDispatchSystemContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
         }
 
-        public void UpdateUser(User user)
+        public void AddUser(User user)
         {
-            throw new NotImplementedException();
+            _context.Users.Add(user);
+            _context.SaveChanges();
         }
 
         public void DeleteUser(User user)
         {
-            throw new NotImplementedException();
+            _context.Users.Remove(user);
+            _context.SaveChanges();
         }
 
-        public User GetUserById(int userId)
+        public User? GetUserById(int userId)
         {
-            throw new NotImplementedException();
+            return _context.Users
+                .FirstOrDefault(u => u.UserId == userId);
         }
 
         public List<User> GetAllUsers()
         {
-            try
-            {
-                using PoliceDispatchSystemContext context = new PoliceDispatchSystemContext();
-                return context.Users.Select(u => (User)u).ToList();
-            }
-            catch
-            {
-                return null;
-            }
+            return _context.Users.ToList();
         }
     }
-
 }

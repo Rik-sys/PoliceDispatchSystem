@@ -1,9 +1,5 @@
-﻿using DTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//ממשק-לוגיקת שיוך שוטרים לקריאה
+using DTO;
 
 namespace IBL
 {

@@ -1,82 +1,9 @@
-﻿//using AutoMapper;
-//using DBEntities.Models;
-//using DTO;
-//using IBL;
-//using IDAL;
-
-//namespace BLL
-//{
-//    public class EventService : IEventService
-//    {
-//        private readonly IEventDAL _eventDal;
-//        private readonly IMapper _mapper;
-
-//        public EventService(IEventDAL eventDal)
-//        {
-//            _eventDal = eventDal;
-
-//            var config = new MapperConfiguration(cfg =>
-//            {
-//                cfg.CreateMap<EventDTO, Event>().ReverseMap();
-//                cfg.CreateMap<EventZoneDTO, EventZone>().ReverseMap();
-//            });
-
-//            _mapper = config.CreateMapper();
-//        }
-
-//        public int CreateEventWithZone(EventDTO eventDto, EventZoneDTO zoneDto)
-//        {
-//            // המרה מ־DTO ל־Entity
-//            var eventEntity = _mapper.Map<Event>(eventDto);
-//            int eventId = _eventDal.AddEvent(eventEntity);
-
-//            var zoneEntity = _mapper.Map<EventZone>(zoneDto);
-//            zoneEntity.EventId = eventId;
-
-//            _eventDal.AddEventZone(zoneEntity);
-
-//            return eventId;
-//        }
-
-//        public EventDTO GetEventById(int eventId)
-//        {
-//            var ev = _eventDal.GetEventById(eventId);
-//            return _mapper.Map<EventDTO>(ev);
-//        }
-
-//        public List<PoliceOfficer> GetAvailableOfficersForEvent(DateOnly date, TimeOnly start, TimeOnly end)
-//        {
-//            using var context = new PoliceDispatchSystemContext();
-
-//            // שליפת כל השוטרים ששובצו באירועים חופפים
-//            var busyOfficerIds = context.OfficerAssignments
-//                .Where(assign => context.Events.Any(ev =>
-//                    ev.EventId == assign.EventId &&
-//                    ev.EventDate == date &&
-//                    (
-//                        (ev.StartTime <= end && ev.EndTime >= start)
-//                    )
-//                ))
-//                .Select(assign => assign.PoliceOfficerId)
-//                .Distinct()
-//                .ToList();
-
-//            // שליפת רק שוטרים שאינם תפוסים
-//            var availableOfficers = context.PoliceOfficers
-//                .Where(p => !busyOfficerIds.Contains(p.PoliceOfficerId))
-//                .ToList();
-
-//            return availableOfficers;
-//        }
-
-//    }
-//}
-using AutoMapper;
+﻿using AutoMapper;
 using DTO;
 using IBL;
 using IDAL;
 using DBEntities.Models;
-
+using Microsoft.Extensions.Logging;
 namespace BLL
 {
     public class EventService : IEventService
@@ -84,24 +11,24 @@ namespace BLL
         private readonly IEventDAL _eventDal;
         private readonly IPoliceOfficerDAL _policeOfficerDal;
         private readonly IMapper _mapper;
+        private readonly ILogger<EventService> _logger;
 
-        public EventService(IEventDAL eventDal, IPoliceOfficerDAL policeOfficerDal)
+        public EventService(
+            IEventDAL eventDal,
+            IPoliceOfficerDAL policeOfficerDal,
+            ILogger<EventService> logger)
         {
             _eventDal = eventDal;
             _policeOfficerDal = policeOfficerDal;
+            _logger = logger;
 
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<EventDTO, Event>().ReverseMap();
                 cfg.CreateMap<EventZoneDTO, EventZone>().ReverseMap();
-
-                // מיפוי של User (DTO ← → Entity)
                 cfg.CreateMap<UserDTO, User>().ReverseMap();
-
-                // מיפוי של PoliceOfficer עם User מקונן
                 cfg.CreateMap<PoliceOfficer, PoliceOfficerDTO>()
                     .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.PoliceOfficerNavigation));
-
                 cfg.CreateMap<PoliceOfficerDTO, PoliceOfficer>()
                     .ForMember(dest => dest.PoliceOfficerNavigation, opt => opt.MapFrom(src => src.User));
             });
@@ -110,49 +37,182 @@ namespace BLL
 
         public int CreateEventWithZone(EventDTO eventDto, EventZoneDTO zoneDto)
         {
-            var eventEntity = _mapper.Map<Event>(eventDto);
-            int eventId = _eventDal.AddEvent(eventEntity);
+            try
+            {
+                _logger.LogInformation($"Creating event: {eventDto.EventName}");
 
-            var zoneEntity = _mapper.Map<EventZone>(zoneDto);
-            zoneEntity.EventId = eventId;
-            _eventDal.AddEventZone(zoneEntity);
+                var eventEntity = _mapper.Map<Event>(eventDto);
+                int eventId = _eventDal.AddEvent(eventEntity);
 
-            return eventId;
+                var zoneEntity = _mapper.Map<EventZone>(zoneDto);
+                zoneEntity.EventId = eventId;
+                _eventDal.AddEventZone(zoneEntity);
+
+                _logger.LogInformation($"Event {eventId} created successfully");
+                return eventId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error creating event: {eventDto.EventName}");
+                throw;
+            }
         }
 
         public EventDTO GetEventById(int eventId)
         {
-            var ev = _eventDal.GetEventById(eventId);
-            return _mapper.Map<EventDTO>(ev);
+            try
+            {
+                var eventEntity = _eventDal.GetEventById(eventId);
+                if (eventEntity == null)
+                {
+                    _logger.LogWarning($"Event {eventId} not found");
+                    return null;
+                }
+
+                return _mapper.Map<EventDTO>(eventEntity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting event {eventId}");
+                throw;
+            }
         }
 
         public List<PoliceOfficerDTO> GetAvailableOfficersForEvent(DateOnly date, TimeOnly start, TimeOnly end)
         {
-            // קריאה דרך DAL עם Include של Users
-            var availableOfficers = _policeOfficerDal.GetAvailableOfficersWithUsers(date, start, end);
+            try
+            {
+                _logger.LogDebug($"Getting available officers for {date} {start}-{end}");
 
-            // המרה ל-DTO הקיים
-            return _mapper.Map<List<PoliceOfficerDTO>>(availableOfficers);
+                // קריאה דרך DAL עם Include של Users
+                var availableOfficers = _policeOfficerDal.GetAvailableOfficersWithUsers(date, start, end);
+                return _mapper.Map<List<PoliceOfficerDTO>>(availableOfficers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting available officers for {date} {start}-{end}");
+                throw;
+            }
         }
 
         public void DeleteEvent(int eventId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _logger.LogInformation($"Deleting event {eventId}");
+
+                // בדיקה שהאירוע קיים
+                var existingEvent = _eventDal.GetEventById(eventId);
+                if (existingEvent == null)
+                {
+                    throw new ArgumentException($"Event {eventId} not found");
+                }
+
+                // מחיקת האירוע 
+                _eventDal.DeleteEvent(eventId);
+
+                _logger.LogInformation($"Event {eventId} deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting event {eventId}");
+                throw;
+            }
         }
+
+        public void DeleteEventComplete(int eventId)
+        {
+            try
+            {
+                _logger.LogInformation($"Performing complete deletion of event {eventId}");
+
+                // בינתיים רק מחיקה בסיסית
+                _eventDal.DeleteEvent(eventId);
+
+                _logger.LogInformation($"Complete deletion of event {eventId} finished successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in complete deletion of event {eventId}");
+                throw;
+            }
+        }
+
         public List<EventDTO> GetEvents()
         {
-            return _eventDal.GetEvents().Select(ev => _mapper.Map<EventDTO>(ev)).ToList();
+            try
+            {
+                var events = _eventDal.GetEvents();
+                return events.Select(ev => _mapper.Map<EventDTO>(ev)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all events");
+                throw;
+            }
         }
+
         public List<EventZoneDTO> GetAllEventZones()
         {
-            var zones = _eventDal.GetAllEventZones();
-            return zones.Select(z => _mapper.Map<EventZoneDTO>(z)).ToList();
+            try
+            {
+                var zones = _eventDal.GetAllEventZones();
+                return zones.Select(z => _mapper.Map<EventZoneDTO>(z)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all event zones");
+                throw;
+            }
         }
+
         public EventZoneDTO? GetEventZoneByEventId(int eventId)
         {
-            var zone = _eventDal.GetEventZoneByEventId(eventId);
-            return zone != null ? _mapper.Map<EventZoneDTO>(zone) : null;
+            try
+            {
+                var zone = _eventDal.GetEventZoneByEventId(eventId);
+                return zone != null ? _mapper.Map<EventZoneDTO>(zone) : null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting zone for event {eventId}");
+                throw;
+            }
         }
+
+        public List<EventDTO> GetEventsByDateRange(DateOnly EventDate)
+        {
+            try
+            {
+                var events = _eventDal.GetEventsByDateRange(EventDate);
+                return events.Select(ev => _mapper.Map<EventDTO>(ev)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting events for date {EventDate}");
+                throw;
+            }
+        }
+
+        public bool IsEventActive(int eventId, DateTime currentTime)
+        {
+            try
+            {
+                var eventDto = GetEventById(eventId);
+                if (eventDto == null) return false;
+
+                var eventDateTime = eventDto.EventDate.ToDateTime(eventDto.StartTime);
+                var eventEndDateTime = eventDto.EventDate.ToDateTime(eventDto.EndTime);
+
+                return currentTime >= eventDateTime && currentTime <= eventEndDateTime;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking if event {eventId} is active");
+                return false;
+            }
+        }
+
 
     }
 }

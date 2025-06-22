@@ -1,15 +1,9 @@
 ﻿using DTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL
 {
     public interface IGraphManagerService
     {
-        // Current Graph Management
         void SetCurrentGraph(Graph graph, Dictionary<long, (double lat, double lon)> nodes,
                             Dictionary<long, bool> nodesInOriginalBounds,
                             (double minLat, double maxLat, double minLon, double maxLon)? bounds = null);

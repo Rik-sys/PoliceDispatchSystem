@@ -1,4 +1,4 @@
-﻿
+﻿//ממשק לוגיקת ניהול קריאות
 using DTO;
 using static DTO.CallResponsesDTO;
 

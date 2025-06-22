@@ -1,9 +1,6 @@
-﻿// GraphManagerService.cs - גרסה מתוקנת לחלוטין
+﻿// מחלקה לניהול זיכרון פנימי של הגרפים
 using DTO;
-using IBL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 
 namespace BLL
 {

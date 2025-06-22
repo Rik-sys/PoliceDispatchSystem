@@ -13,26 +13,48 @@ namespace DAL
         {
             _context = context;
         }
-
         public List<PoliceOfficer> GetAvailableOfficersWithUsers(DateOnly date, TimeOnly start, TimeOnly end)
         {
             // שליפת כל השוטרים ששובצו באירועים חופפים
             var busyOfficerIds = _context.OfficerAssignments
-                .Where(assign => _context.Events.Any(ev =>
-                    ev.EventId == assign.EventId &&
-                    ev.EventDate == date &&
-                    (ev.StartTime <= end && ev.EndTime >= start)
-                ))
-                .Select(assign => assign.PoliceOfficerId)
-                .Distinct()
-                .ToList();
+       .Where(assign => _context.Events.Any(ev =>
+           ev.EventId == assign.EventId &&
+           ev.EventDate == date &&
+           // לוגיקה נכונה לבדיקת חפיפה
+           (ev.StartTime < end && ev.EndTime > start)
+       ))
+       .Select(assign => assign.PoliceOfficerId)
+       .Distinct()
+       .ToList();
 
-            // שליפת רק שוטרים שאינם תפוסים + Include של User ו-VehicleType
-            return _context.PoliceOfficers
-                .Include(p => p.PoliceOfficerNavigation) // זה ה-User
-                .Include(p => p.VehicleType) // אופציונלי אם רוצים גם סוג רכב
+            // ראשית - שלוף שוטרים בלי Include
+            var availableOfficers = _context.PoliceOfficers
+                .Include(p => p.VehicleType) // רק VehicleType
                 .Where(p => !busyOfficerIds.Contains(p.PoliceOfficerId))
                 .ToList();
+
+            // לוג לבדיקה
+            Console.WriteLine($"Found {availableOfficers.Count} officers before user check");
+
+            //  Include אחר כך - אם יש בעיה, לפחות שיהיה שוטרים
+            try
+            {
+                var officersWithUsers = _context.PoliceOfficers
+                    .Include(p => p.PoliceOfficerNavigation) // User
+                    .Include(p => p.VehicleType)
+                    .Where(p => !busyOfficerIds.Contains(p.PoliceOfficerId))
+                    .Where(p => p.PoliceOfficerNavigation != null) // רק עם משתמש תקין!
+                    .ToList();
+
+                Console.WriteLine($"Found {officersWithUsers.Count} officers WITH users");
+                return officersWithUsers;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Include failed: {ex.Message}");
+                Console.WriteLine($"Returning {availableOfficers.Count} officers without users");
+                return availableOfficers;
+            }
         }
 
         public List<PoliceOfficer> GetAllOfficersWithUsers()
@@ -46,9 +68,10 @@ namespace DAL
         public PoliceOfficer GetOfficerWithUserById(int officerId)
         {
             return _context.PoliceOfficers
-                .Include(p => p.PoliceOfficerNavigation)
-                .Include(p => p.VehicleType)
-                .FirstOrDefault(p => p.PoliceOfficerId == officerId);
+            .Include(p => p.PoliceOfficerNavigation)
+            .Include(p => p.VehicleType)
+            .FirstOrDefault(p => p.PoliceOfficerId == officerId)!; // סימון שאני בטוחה שזה לא null
+
         }
 
         public OfficerStatusDTO GetOfficerStatus(int officerId)
@@ -63,6 +86,13 @@ namespace DAL
 
             return new OfficerStatusDTO { OfficerId = officerId, Status = "Available" };
         }
+
+        public PoliceOfficer? GetOfficerById(int officerId)
+        {
+            return _context.PoliceOfficers
+                .FirstOrDefault(o => o.PoliceOfficerId == officerId);
+        }
+
 
     }
 }
