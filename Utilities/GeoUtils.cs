@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System.Text.Json;
+using System.Net.Http;
 
 namespace Utilities
 {
     public static class GeoUtils
     {
         private const double EARTH_RADIUS_METERS = 6371000;
+        private static readonly HttpClient client = new HttpClient();
+
 
         /// <summary>
         /// מחשב מרחק אווירי בין שתי נקודות גיאוגרפיות באמצעות נוסחת הברסין
@@ -35,5 +35,20 @@ namespace Utilities
         }
 
         private static double ToRadians(double degrees) => degrees * Math.PI / 180;
+
+        
+
+            public static double GetDrivingDistance(double lat1, double lon1, double lat2, double lon2)
+            {
+                string url = $"https://router.project-osrm.org/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false";
+                var response = client.GetStringAsync(url).Result;
+
+                using var doc = JsonDocument.Parse(response);
+                var root = doc.RootElement;
+
+                // מוציא את המרחק במטרים מתוך ה־JSON שה־API מחזיר
+                double distance = root.GetProperty("routes")[0].GetProperty("distance").GetDouble();
+                return distance;
+            }
+        }
     }
-}

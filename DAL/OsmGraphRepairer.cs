@@ -55,7 +55,7 @@ namespace DAL
                 foreach (var b in sampledB)
                 {
                     var coordB = fullNodes[b];
-                    double dist = GeoUtils.CalculateDistance(coordA.lat, coordA.lon, coordB.lat, coordB.lon);
+                    double dist = GeoUtils.GetDrivingDistance(coordA.lat, coordA.lon, coordB.lat, coordB.lon);
                     if (dist < minPair.dist)
                     {
                         minPair = (a, b, dist);

@@ -1,5 +1,5 @@
 ﻿
-//ממשקל לניהול מידע על יוזר
+//ממשק לניהול מידע על יוזר
 using DBEntities.Models;
 namespace IDAL
 {
