@@ -228,7 +228,7 @@ namespace DAL
 
             if (Config.VerboseOnewayLogging)
             {
-                Console.WriteLine($"✂️  מפצל קטע {onewayInfo.Direction} באורך {totalDistance:F0}m ל-{numSegments} קטעים");
+                Console.WriteLine($" מפצל קטע {onewayInfo.Direction} באורך {totalDistance:F0}m ל-{numSegments} קטעים");
             }
 
             var currentFromId = fromId;

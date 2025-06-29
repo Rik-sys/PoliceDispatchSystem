@@ -6,10 +6,6 @@ namespace IDAL
 {
     public interface IOfficerAssignmentDAL
     {
-        //void AddAssignments(List<OfficerAssignment> list);
-        //List<OfficerAssignment> GetAssignmentsByEventId(int eventId);
-        //List<OfficerAssignment> GetAssignmentsByOfficerId(int officerId);
-        //List<OfficerAssignment> GetAllAssignments();
         void AddAssignments(List<OfficerAssignment> assignments);
         void AddAssignment(OfficerAssignment assignment);
         List<OfficerAssignment> GetAssignmentsByEventId(int eventId);

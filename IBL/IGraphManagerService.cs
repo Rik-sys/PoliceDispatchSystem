@@ -17,7 +17,7 @@ namespace BLL
         void SetDisplayGraph(Graph graph);
         (double lat, double lon)? GetNodeLocation(long nodeId);
 
-        // Event Graphs Management
+        
         void SaveGraphForEvent(int eventId, Graph graph, Dictionary<long, (double lat, double lon)> nodes,
                               Dictionary<long, bool> nodesInBounds);
         GraphData GetGraphForEvent(int? eventId);

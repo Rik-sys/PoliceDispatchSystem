@@ -62,7 +62,6 @@ namespace BLL
                 // המרה מ-DTO ל-Entity
                 var entities = _mapper.Map<List<OfficerAssignment>>(validatedAssignments);
 
-                // במסד שלך אין AssignedAt ו-IsActive, אז לא מוסיפים אותם
 
                 // שמירה דרך שכבת ה-DAL
                 _officerAssignmentDal.AddAssignments(entities);

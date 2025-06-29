@@ -63,7 +63,7 @@ namespace BLL
             //הצמתים שעדיין לא כוסו
             var remainingNodes = new HashSet<long>(nodeIds);
 
-            // טיפול מיוחד במקרה של k=1 (כשמצפים למרכז אחד)
+            
             if (radius >= _allDistances.Last())
             {
                 // אם הרדיוס גדול מהמרחק המקסימלי, צומת אחד יכול לכסות הכל

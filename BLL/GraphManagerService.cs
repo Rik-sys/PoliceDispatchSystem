@@ -16,7 +16,7 @@ namespace BLL
         // מילון לשמירת גרפים לפי מזהה אירוע
         private static Dictionary<int, GraphData> _eventGraphs = new Dictionary<int, GraphData>();
 
-        // lock objects for thread safety
+        // אובייקטים לוק לניהול תרדים
         private static readonly object _currentGraphLock = new object();
         private static readonly object _eventGraphsLock = new object();
 

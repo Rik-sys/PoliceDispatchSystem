@@ -217,7 +217,6 @@ namespace BLL
             return dominationGraph;
         }
 
-        // שמירה על הפונקציות המקוריות
         private Dictionary<(long, long), double> ComputeAllPairsShortestPaths(Graph graph)
         {
             var distances = new Dictionary<(long, long), double>();

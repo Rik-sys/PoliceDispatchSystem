@@ -138,7 +138,7 @@ namespace DTO
         /// </summary>
         private long SplitWaySegment(WaySegment originalSegment, long newNodeId, (double lat, double lon) splitPoint)
         {
-            Console.WriteLine($"✂️  מפצל קטע מ-{originalSegment.FromNodeId} ל-{originalSegment.ToNodeId}");
+            Console.WriteLine($"  מפצל קטע מ-{originalSegment.FromNodeId} ל-{originalSegment.ToNodeId}");
 
             // 1. מחיקת הקשת המקורית
             RemoveEdgeBetweenNodes(originalSegment.FromNodeId, originalSegment.ToNodeId);
@@ -187,7 +187,7 @@ namespace DTO
                 HighwayType = originalSegment.HighwayType
             });
 
-            Console.WriteLine($"✅ פיצול הושלם בהצלחה - צומת {newNodeId} נוסף ל-Way {originalSegment.WayId}");
+            Console.WriteLine($" פיצול הושלם בהצלחה - צומת {newNodeId} נוסף ל-Way {originalSegment.WayId}");
 
             return newNodeId;
         }

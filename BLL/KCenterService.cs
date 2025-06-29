@@ -1,40 +1,4 @@
-﻿//using BLL;
-//using DTO;
-//using IBL;
-
-//public class KCenterService : IKCenterService
-//{
-//    public (List<long> CenterNodes, double MaxDistance) DistributePolice(
-//        Graph graph,
-//        int k,
-//        HashSet<long> allowedNodes,
-//        List<long> strategicNodes = null)
-//    {
-//        // סינון הגרף לפי הצמתים המותרים (התחום)
-//        var filteredGraph = graph.FilterNodes(allowedNodes);
-
-//        List<long> centerNodes;
-//        double radius;
-
-//        if (strategicNodes != null && strategicNodes.Any())
-//        {
-//            // אם יש אזורים אסטרטגיים – השתמש בפתרון החכם
-//            var solver = new SmartKCenterSolver(filteredGraph);
-//            (centerNodes, radius) = solver.SolveWithStrategicZones(k, strategicNodes);
-//        }
-//        else
-//        {
-//            // אחרת – פיזור רגיל
-//            var solver = new KCenterSolver(filteredGraph);
-//            (centerNodes, radius) = solver.Solve(k);
-//        }
-
-//        return (centerNodes, radius);
-//    }
-//}
-
-// BLL/KCenterService.cs
-using BLL;
+﻿
 using DTO;
 using IBL;
 using Microsoft.Extensions.Logging;
@@ -104,19 +68,19 @@ namespace BLL
 
             var originalNodes = bounds.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToHashSet();
 
-            _logger.LogInformation($"🔍 מספר צמתים בתחום: {originalNodes.Count}");
-            _logger.LogInformation($"🛣️  מספר קטעי דרך זמינים: {graph.WaySegments.Count}");
+            _logger.LogInformation($"מספר צמתים בתחום: {originalNodes.Count}");
+            _logger.LogInformation($" מספר קטעי דרך זמינים: {graph.WaySegments.Count}");
 
             // יצירת צמתים אסטרטגיים על Ways אמיתיים
             List<long> strategicNodeIds = new List<long>();
 
             if (request.StrategicZones != null && request.StrategicZones.Any())
             {
-                _logger.LogInformation($"🎯 יוצר {request.StrategicZones.Count} צמתים אסטרטגיים על דרכים:");
+                _logger.LogInformation($" יוצר {request.StrategicZones.Count} צמתים אסטרטגיים על דרכים:");
 
                 foreach (var zone in request.StrategicZones)
                 {
-                    _logger.LogDebug($"\n📍 מעבד אזור: ({zone.Latitude}, {zone.Longitude})");
+                    _logger.LogDebug($"\n מעבד אזור: ({zone.Latitude}, {zone.Longitude})");
 
                     // שימוש בפונקציה שמפצלת Ways
                     var newStrategicNodeId = graph.CreateStrategicNodeOnWay(
@@ -134,16 +98,16 @@ namespace BLL
                         nodes[newStrategicNodeId] = (actualCoord.Latitude, actualCoord.Longitude);
                         bounds[newStrategicNodeId] = true;
 
-                        _logger.LogDebug($"✅ נוצר צומת אסטרטגי {newStrategicNodeId} על דרך אמיתית");
+                        _logger.LogDebug($" נוצר צומת אסטרטגי {newStrategicNodeId} על דרך אמיתית");
                     }
                     else
                     {
-                        _logger.LogWarning($"❌ כשל ביצירת צומת אסטרטגי - לא נמצא קטע דרך מתאים");
+                        _logger.LogWarning($" כשל ביצירת צומת אסטרטגי - לא נמצא קטע דרך מתאים");
                     }
                 }
 
                 strategicNodeIds = strategicNodeIds.Distinct().ToList();
-                _logger.LogInformation($"\n🎯 סה\"כ צמתים אסטרטגיים נוצרו: {strategicNodeIds.Count}");
+                _logger.LogInformation($"\n סה\"כ צמתים אסטרטגיים נוצרו: {strategicNodeIds.Count}");
             }
 
             // עדכון רשימת הצמתים המותרים
@@ -153,17 +117,17 @@ namespace BLL
                 allowedNodesForDistribution.Add(strategicId);
             }
 
-            _logger.LogInformation($"📊 סה\"כ צמתים זמינים לפיזור: {allowedNodesForDistribution.Count}");
+            _logger.LogInformation($" סה\"כ צמתים זמינים לפיזור: {allowedNodesForDistribution.Count}");
 
             // פיזור עם צמתים אסטרטגיים
             var result = DistributePolice(graph, request.K, allowedNodesForDistribution, strategicNodeIds);
 
-            _logger.LogInformation($"\n📍 האלגוריתם בחר {result.CenterNodes.Count} צמתים:");
+            _logger.LogInformation($"\n האלגוריתם בחר {result.CenterNodes.Count} צמתים:");
             foreach (var nodeId in result.CenterNodes)
             {
                 if (nodes.TryGetValue(nodeId, out var coord))
                 {
-                    var isStrategic = strategicNodeIds.Contains(nodeId) ? "🎯 אסטרטגי" : "👮 רגיל";
+                    var isStrategic = strategicNodeIds.Contains(nodeId) ? " אסטרטגי" : " רגיל";
                     var nodeType = graph.IsStrategicNode(nodeId) ? " (על דרך)" : " (OSM מקורי)";
                     _logger.LogDebug($"   {isStrategic}: צומת {nodeId} במיקום ({coord.lat:F6}, {coord.lon:F6}){nodeType}");
                 }
@@ -173,7 +137,7 @@ namespace BLL
             var missingStrategic = strategicNodeIds.Where(id => !result.CenterNodes.Contains(id)).ToList();
             if (missingStrategic.Any())
             {
-                _logger.LogError($"❌ צמתים אסטרטגיים שלא נכללו: {string.Join(", ", missingStrategic)}");
+                _logger.LogError($" צמתים אסטרטגיים שלא נכללו: {string.Join(", ", missingStrategic)}");
                 throw new InvalidOperationException($"האלגוריתם לא הצליח לכלול את כל הצמתים האסטרטגיים. חסרים: {string.Join(", ", missingStrategic)}");
             }
 

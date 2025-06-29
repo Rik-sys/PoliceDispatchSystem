@@ -17,7 +17,7 @@ namespace DAL
         {
             // שליפת כל השוטרים ששובצו באירועים חופפים
             var busyOfficerIds = _context.OfficerAssignments
-       .Where(assign => _context.Events.Any(ev =>
+              .Where(assign => _context.Events.Any(ev =>
            ev.EventId == assign.EventId &&
            ev.EventDate == date &&
            // לוגיקה נכונה לבדיקת חפיפה

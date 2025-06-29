@@ -299,10 +299,7 @@ namespace BLL
             }
 
             var newGraph = BuildGraph(originalNodes, disconnectedGraph.GetAllEdges().Concat(allAddedEdges).ToList());
-            //if (!newGraph.IsConnected() && components.Count > 2)
-            //{
-            //    return RepairGraphIteratively(newGraph, originalNodes, fullNodes, fullEdges, maxSearchDistance);
-            //}
+           
             return newGraph;
         }
 
@@ -310,54 +307,6 @@ namespace BLL
 
         #region Private Helper Methods
 
-
-        //תיקון איטרטיבי לוגית אין בו צורך בכלל ועדיף את הראשון
-        //private Graph RepairGraphIteratively(
-        //    Graph partiallyRepairedGraph,
-        //    Dictionary<long, (double lat, double lon)> originalNodes,
-        //    Dictionary<long, (double lat, double lon)> fullNodes,
-        //    List<(long from, long to)> fullEdges,
-        //    double maxSearchDistance)
-        //{
-        //    var components = partiallyRepairedGraph.GetConnectedComponents();
-        //    if (components.Count <= 1) return partiallyRepairedGraph;
-
-        //    var allAddedEdges = new List<(long from, long to)>();
-
-        //    //מיון בסדר יורד (מהגדול לקטן) לפי מספר האיברים בכל HashSet
-        //    components.Sort((a, b) => b.Count.CompareTo(a.Count));
-
-        //    var mainComponent = new HashSet<long>(components[0]);
-
-        //    for (int i = 1; i < components.Count; i++)
-        //    {
-        //        var currentComponent = new HashSet<long>(components[i]);
-        //        var connectingPath = OsmGraphRepairer.FindConnectingPath(
-        //            mainComponent,
-        //            currentComponent,
-        //            fullNodes,
-        //            fullEdges,
-        //            maxSearchDistance);
-
-        //        if (connectingPath.Count > 0)
-        //        {
-        //            allAddedEdges.AddRange(connectingPath);
-        //            foreach (var nodeId in currentComponent)
-        //            {
-        //                mainComponent.Add(nodeId);
-        //            }
-        //            foreach (var (from, to) in connectingPath)
-        //            {
-        //                if (!originalNodes.ContainsKey(from) && fullNodes.ContainsKey(from))
-        //                    originalNodes[from] = fullNodes[from];
-        //                if (!originalNodes.ContainsKey(to) && fullNodes.ContainsKey(to))
-        //                    originalNodes[to] = fullNodes[to];
-        //            }
-        //        }
-        //    }
-
-        //    return BuildGraph(originalNodes, partiallyRepairedGraph.GetAllEdges().Concat(allAddedEdges).ToList());
-        //}
 
         private Graph BuildGraph(Dictionary<long, (double lat, double lon)> nodesData,
                              List<(long from, long to)> edgesData)
